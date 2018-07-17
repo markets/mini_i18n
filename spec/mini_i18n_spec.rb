@@ -1,6 +1,5 @@
 RSpec.describe MiniI18n do
   before(:all) do
-    puts File.expand_path(__dir__ + '/fixtures/locales/*')
     MiniI18n.load_translations File.expand_path(__dir__ + '/fixtures/locales/*')
   end
 
