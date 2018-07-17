@@ -1,4 +1,3 @@
-require "bundler/setup"
 require "mini_i18n"
 
 RSpec.configure do |config|
