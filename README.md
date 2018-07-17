@@ -1,5 +1,7 @@
 # MiniI18n
 
+[![Build Status](https://travis-ci.org/markets/mini_i18n.svg?branch=master)](https://travis-ci.org/markets/mini_i18n)
+
 > WIP
 
 ## Installation
