@@ -1,0 +1,6 @@
+en:
+  hello: "hello"
+  hello_interpolation: "hello %{name}"
+  fallback: "fallback"
+  second_level:
+    hello: ""
