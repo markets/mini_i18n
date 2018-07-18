@@ -3,7 +3,7 @@ require "./lib/mini_i18n/version"
 Gem::Specification.new do |spec|
   spec.name          = "mini_i18n"
   spec.version       = MiniI18n::VERSION
-  spec.summary       = "Minimalist I18n library"
+  spec.summary       = "Minimalistic I18n library for Ruby"
   spec.authors       = ["markets"]
   spec.email         = ["srmarc.ai@gmail.com"]
   spec.license       = "MIT"
