@@ -16,6 +16,24 @@ RSpec.describe MiniI18n do
     end
   end
 
+  describe 'default_locale=' do
+    it 'defaults to default_locale if locale is not valid' do
+      MiniI18n.default_locale = :foo
+
+      expect(MiniI18n.default_locale).to eq :en
+    end
+  end
+
+  describe 'locale' do
+    it 'allows to change locale globally' do
+      MiniI18n.locale = :en
+      expect(MiniI18n.t(:hello)).to eq 'hello'
+
+      MiniI18n.locale = :es
+      expect(MiniI18n.t(:hello)).to eq 'hola'
+    end
+  end
+
   describe 'translate' do
     it "simple key" do
       expect(MiniI18n.t(:hello)).to eq 'hello'
@@ -53,16 +71,6 @@ RSpec.describe MiniI18n do
 
       MiniI18n.fallbacks = true
       expect(MiniI18n.t('fallback', locale: :es)).to eq 'fallback'
-    end
-  end
-
-  describe 'locale' do
-    it 'allows to change locale globally' do
-      MiniI18n.locale = :en
-      expect(MiniI18n.t(:hello)).to eq 'hello'
-
-      MiniI18n.locale = :es
-      expect(MiniI18n.t(:hello)).to eq 'hola'
     end
   end
 end

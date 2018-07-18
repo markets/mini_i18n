@@ -14,7 +14,7 @@ module MiniI18n
     end
 
     def default_locale=(new_locale)
-      @@default_locale = valid_locale?(new_locale) || default_locale
+      @@default_locale = available_locale?(new_locale) || default_locale
     end
 
     def default_available_locales
