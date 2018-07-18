@@ -6,6 +6,7 @@ Gem::Specification.new do |spec|
   spec.summary       = "Minimalistic I18n library for Ruby"
   spec.authors       = ["markets"]
   spec.email         = ["srmarc.ai@gmail.com"]
+  spec.homepage      = "https://github.com/markets/mini_i18n"
   spec.license       = "MIT"
   spec.files         = Dir.glob("lib/**/*")
   spec.test_files    = Dir.glob("spec/**/*")
