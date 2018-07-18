@@ -6,6 +6,7 @@ RSpec.describe MiniI18n do
   before(:each) do
     MiniI18n.locale = :en
     MiniI18n.fallbacks = false
+    MiniI18n.available_locales = [:en, :es, :fr]
   end
 
   describe 'load_translations' do
@@ -21,6 +22,14 @@ RSpec.describe MiniI18n do
       MiniI18n.default_locale = :foo
 
       expect(MiniI18n.default_locale).to eq :en
+    end
+  end
+
+  describe 'available_locales=' do
+    it 'wraps into an array of strings' do
+      MiniI18n.available_locales = :en
+
+      expect(MiniI18n.available_locales).to eq ["en"]
     end
   end
 

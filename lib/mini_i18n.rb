@@ -26,7 +26,7 @@ module MiniI18n
     end
 
     def available_locales=(new_locales)
-      @@available_locales = new_locales.map(&:to_s)
+      @@available_locales = Array(new_locales).map(&:to_s)
     end
 
     def translations
