@@ -110,9 +110,14 @@ It accepts the following options:
 
 It also accepts interpolation:
 
+```yaml
+en:
+  hello_with_name: "Hello %{name}!"
+```
+
 ```ruby
 >> MiniI18n.t(:hello_with_name, name: 'John Doe')
-=> "Hello John Doe"
+=> "Hello John Doe!"
 ```
 
 ## Development
