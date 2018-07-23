@@ -77,7 +77,13 @@ Basic example usage:
 => nil
 ```
 
-The `t` method can be also used as `translate`: `MiniI18n.translate(:hello)`. It accepts the following options:
+The `t` method can be also used as `translate`:
+
+```ruby
+MiniI18n.translate(:hello)
+```
+
+It accepts the following options:
 
 * `locale`
 
@@ -98,7 +104,7 @@ The `t` method can be also used as `translate`: `MiniI18n.translate(:hello)`. It
 * `default`
 
 ```ruby
->> MiniI18n.t(:hello, locale: :de, default: 'default value')
+>> MiniI18n.t(:hellooo, default: 'default value')
 => "default value"
 ```
 
