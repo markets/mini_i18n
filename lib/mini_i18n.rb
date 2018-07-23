@@ -47,14 +47,14 @@ module MiniI18n
 
     def load_translations(path)
       Dir[path].each do |file|
-        YAML.load_file(file).each do |locale, values|
+        YAML.load_file(file).each do |locale, new_translations|
           locale = locale.to_s
           @@available_locales << locale unless available_locale?(locale)
 
           if translations[locale]
-            translations[locale] = Utils.deep_merge(translations[locale], values)
+            translations[locale] = Utils.deep_merge(translations[locale], new_translations)
           else
-            translations[locale] = values
+            translations[locale] = new_translations
           end
         end
       end
