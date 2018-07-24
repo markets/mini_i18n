@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.3.0]
 
-- Improves `MiniI18n.available_locales=` method to wrap parameters into an Array
+- Improves `MiniI18n.available_locales=` method to always wrap arguments into an Array
 
 ## [0.2.1]
 

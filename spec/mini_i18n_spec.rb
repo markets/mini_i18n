@@ -15,6 +15,10 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.translations.size). to eq 3
       expect(MiniI18n.translations["en"]).to include 'bye'
     end
+
+    it "does not raise if path is nil" do
+      expect(MiniI18n.load_translations(nil)).to eq []
+    end
   end
 
   describe 'default_locale=' do

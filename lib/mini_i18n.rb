@@ -46,7 +46,7 @@ module MiniI18n
     end
 
     def load_translations(path)
-      Dir[path].each do |file|
+      Dir[path.to_s].each do |file|
         YAML.load_file(file).each do |locale, new_translations|
           locale = locale.to_s
           @@available_locales << locale unless available_locale?(locale)
