@@ -72,11 +72,11 @@ module MiniI18n
       keys << key.to_s.split(SEPARATOR)
       keys = keys.flatten
 
-      result = translations.dig(*keys)
+      result = lookup(*keys)
 
       if fallbacks && result.empty?
         keys = Utils.replace_with(keys, _locale, default_locale.to_s)
-        result = translations.dig(*keys)
+        result = lookup(*keys)
       end
 
       if count && result.is_a?(Hash)
@@ -111,6 +111,10 @@ module MiniI18n
     def available_locale?(new_locale)
       new_locale = new_locale.to_s
       available_locales.include?(new_locale) && new_locale
+    end
+
+    def lookup(*keys)
+      translations.dig(*keys)
     end
   end
 end
