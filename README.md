@@ -5,7 +5,7 @@
 
 > Minimalistic I18n library for Ruby
 
-`MiniI18n` is a simple and flexible Ruby Internationalization library. It supports interpolations, fallbacks, nested keys and more.
+`MiniI18n` is a simple and flexible Ruby Internationalization library. It supports interpolations, pluralization, fallbacks, nested keys and more.
 
 Translations should be stored in YAML files and they will loaded in a in-memory `Hash`.
 
@@ -108,7 +108,18 @@ It accepts the following options:
 => "default value"
 ```
 
-It also accepts interpolation:
+* `count`
+
+Read more details in the [Pluralization section](#pluralization).
+
+```ruby
+>> MiniI18n.t('notifications', count: 0)
+=> "no unread notifications"
+```
+
+### Interpolation
+
+You can also use variables in your translation definitions:
 
 ```yaml
 en:
@@ -118,6 +129,29 @@ en:
 ```ruby
 >> MiniI18n.t(:hello_with_name, name: 'John Doe')
 => "Hello John Doe!"
+```
+
+### Pluralization
+
+You should define your plurals in the following format:
+
+```yaml
+en:
+  notifications:
+    zero: 'no unread notifications'
+    one: '1 unread notification'
+    many: '%{count} unread notifications'
+```
+
+Then, you should call the method with the `count` option:
+
+```ruby
+>> MiniI18n.t('notifications', count: 0)
+=> "no unread notifications"
+>> MiniI18n.t('notifications', count: 1)
+=> "1 unread notification"
+>> MiniI18n.t('notifications', count: 5)
+=> "5 unread notifications"
 ```
 
 ## Development
