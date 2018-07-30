@@ -1,4 +1,4 @@
-# MiniI18n
+# `MiniI18n`
 
 [![Gem](https://img.shields.io/gem/v/mini_i18n.svg?style=flat-square)](https://rubygems.org/gems/mini_i18n)
 [![Build Status](https://img.shields.io/travis/markets/mini_i18n.svg?style=flat-square)](https://travis-ci.org/markets/mini_i18n)
