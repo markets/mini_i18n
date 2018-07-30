@@ -65,17 +65,29 @@ module MiniI18n
 
       _locale = available_locale?(options[:locale]) || locale
       scope = options[:scope]
+      count = options[:count]
 
       keys = [_locale.to_s]
       keys << scope.to_s.split(SEPARATOR) if scope
       keys << key.to_s.split(SEPARATOR)
       keys = keys.flatten
 
-      result = translations.dig(*keys)
+      result = lookup(*keys)
 
       if fallbacks && result.empty?
         keys = Utils.replace_with(keys, _locale, default_locale.to_s)
-        result = translations.dig(*keys)
+        result = lookup(*keys)
+      end
+
+      if count && result.is_a?(Hash)
+        case count
+        when 0
+          result = result["zero"]
+        when 1
+          result = result["one"]
+        else
+          result = result["many"]
+        end
       end
 
       if result.respond_to?(:match) && result.match(/%{\w+}/)
@@ -99,6 +111,10 @@ module MiniI18n
     def available_locale?(new_locale)
       new_locale = new_locale.to_s
       available_locales.include?(new_locale) && new_locale
+    end
+
+    def lookup(*keys)
+      translations.dig(*keys)
     end
   end
 end

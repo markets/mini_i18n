@@ -85,5 +85,11 @@ RSpec.describe MiniI18n do
       MiniI18n.fallbacks = true
       expect(MiniI18n.t('fallback', locale: :es)).to eq 'fallback'
     end
+
+    it "pluralization" do
+      expect(MiniI18n.t('notifications', count: 0)).to eq 'no unread notifications'
+      expect(MiniI18n.t('notifications', count: 1)).to eq '1 unread notification'
+      expect(MiniI18n.t('notifications', count: 2)).to eq '2 unread notifications'
+    end
   end
 end

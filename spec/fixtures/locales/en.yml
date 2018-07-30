@@ -4,3 +4,7 @@ en:
   fallback: "fallback"
   second_level:
     hello: ""
+  notifications:
+    zero: 'no unread notifications'
+    one: '1 unread notification'
+    many: '%{count} unread notifications'
