@@ -133,7 +133,7 @@ en:
 
 ### Pluralization
 
-You should define your plurals in the following format:
+You should define your plurals in the following format (supported keys: `zero`, `one` and `many`):
 
 ```yaml
 en:
