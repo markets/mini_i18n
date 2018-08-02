@@ -8,10 +8,6 @@ module MiniI18n
       string
     end
 
-    def replace_with(array, old_elem, new_elem)
-      array.map { |elem| elem == old_elem ? new_elem : elem }
-    end
-
     def deep_merge(merge_to, merge_from)
       merged = merge_to.clone
 

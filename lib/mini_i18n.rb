@@ -75,7 +75,7 @@ module MiniI18n
       result = lookup(*keys)
 
       if fallbacks && result.empty?
-        keys = Utils.replace_with(keys, _locale, default_locale.to_s)
+        keys[0] = default_locale.to_s
         result = lookup(*keys)
       end
 
