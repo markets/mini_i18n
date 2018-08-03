@@ -6,6 +6,11 @@ module MiniI18n
   class << self
     DEFAULT_LOCALE = :en
     SEPARATOR = '.'
+    PLURALIZATION_COUNT_TO_KEYWORD = {
+      0 => 'zero',
+      1 => 'one',
+      2 => 'many'
+    }
 
     attr_accessor :fallbacks
 
@@ -80,14 +85,7 @@ module MiniI18n
       end
 
       if count && result.is_a?(Hash)
-        case count
-        when 0
-          result = result["zero"]
-        when 1
-          result = result["one"]
-        else
-          result = result["many"]
-        end
+        result = result.fetch(PLURALIZATION_COUNT_TO_KEYWORD[count], nil)
       end
 
       if result.respond_to?(:match) && result.match(/%{\w+}/)
