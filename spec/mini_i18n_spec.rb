@@ -89,7 +89,7 @@ RSpec.describe MiniI18n do
     it "pluralization" do
       expect(MiniI18n.t('notifications', count: 0)).to eq 'no unread notifications'
       expect(MiniI18n.t('notifications', count: 1)).to eq '1 unread notification'
-      expect(MiniI18n.t('notifications', count: 2)).to eq '2 unread notifications'
+      expect(MiniI18n.t('notifications', count: 5)).to eq '5 unread notifications'
     end
   end
 end
