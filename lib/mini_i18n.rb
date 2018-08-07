@@ -1,9 +1,12 @@
 require "yaml"
 require "mini_i18n/version"
 require "mini_i18n/utils"
+require "mini_i18n/localization"
 
 module MiniI18n
   class << self
+    include Localization
+
     DEFAULT_LOCALE = :en
     SEPARATOR = '.'
 
