@@ -51,14 +51,7 @@ module MiniI18n
     def load_translations(path)
       Dir[path.to_s].each do |file|
         YAML.load_file(file).each do |locale, new_translations|
-          locale = locale.to_s
-          @@available_locales << locale unless available_locale?(locale)
-
-          if translations[locale]
-            translations[locale] = Utils.deep_merge(translations[locale], new_translations)
-          else
-            translations[locale] = new_translations
-          end
+          add_translations(locale.to_s, new_translations)
         end
       end
     end
@@ -118,6 +111,16 @@ module MiniI18n
 
     def lookup(*keys)
       translations.dig(*keys)
+    end
+
+    def add_translations(locale, new_translations)
+      @@available_locales << locale unless available_locale?(locale)
+
+      if translations[locale]
+        translations[locale] = Utils.deep_merge(translations[locale], new_translations)
+      else
+        translations[locale] = new_translations
+      end
     end
   end
 end
