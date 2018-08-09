@@ -4,6 +4,9 @@ module MiniI18n
   module Localization
     extend self
 
+    DELIMITER_REGEX = /\d(?=(\d{3})+(?!\d))/
+    DAYS_MONTHS_REGEX = /%[aAbB]/
+
     def localize(object, options = {})
       case object
       when Numeric
@@ -24,9 +27,9 @@ module MiniI18n
       locale = options[:locale]
       delimiter = MiniI18n.t("number.format.delimiter", locale: locale)
       separator = MiniI18n.t("number.format.separator", locale: locale)
-      integer, fractional = number.to_s.split('.')
+      integer, fractional = number.to_s.split(separator)
 
-      integer.to_s.gsub!(/\d(?=(\d{3})+(?!\d))/) do |match|
+      integer.to_s.gsub!(DELIMITER_REGEX) do |match|
         "#{match}#{delimiter}"
       end
 
@@ -38,7 +41,7 @@ module MiniI18n
       type = options[:type]
       format = MiniI18n.t("#{type}.formats.#{options[:format] || 'default'}", locale: locale)
 
-      format.gsub!(/%[aAbB]/) do |match|
+      format.gsub!(DAYS_MONTHS_REGEX) do |match|
         {
           '%a' => MiniI18n.t('date.abbr_day_names', locale: locale)[object.wday],
           '%A' => MiniI18n.t('date.day_names', locale: locale)[object.wday],
