@@ -1,10 +1,4 @@
 RSpec.describe MiniI18n do
-  before(:each) do
-    MiniI18n.locale = :en
-    MiniI18n.fallbacks = false
-    MiniI18n.available_locales = [:en, :es, :fr]
-  end
-
   describe 'load_translations' do
     it "allows to load multiple locales and translations from different files" do
       expect(MiniI18n.available_locales).to eq ["en", "es", "fr"]

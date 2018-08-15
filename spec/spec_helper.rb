@@ -7,4 +7,10 @@ RSpec.configure do |config|
   config.before(:suite) do
     MiniI18n.load_translations File.expand_path(__dir__ + '/fixtures/locales/*')
   end
+
+  config.before(:each) do
+    MiniI18n.locale = :en
+    MiniI18n.fallbacks = false
+    MiniI18n.available_locales = [:en, :es, :fr]
+  end
 end

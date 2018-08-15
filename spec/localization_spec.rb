@@ -1,8 +1,4 @@
 RSpec.describe MiniI18n::Localization do
-  before(:each) do
-    MiniI18n.locale = :en
-  end
-
   let(:time) { Time.new(2018, 8, 7, 22, 30) }
 
   describe 'date' do
