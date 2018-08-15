@@ -61,7 +61,6 @@ module MiniI18n
 
       _locale = available_locale?(options[:locale]) || locale
       scope = options[:scope]
-      count = options[:count]
 
       keys = [_locale.to_s]
       keys << scope.to_s.split(SEPARATOR) if scope
@@ -70,25 +69,9 @@ module MiniI18n
 
       result = lookup(*keys)
 
-      if fallbacks && result.empty?
-        keys[0] = default_locale.to_s
-        result = lookup(*keys)
-      end
-
-      if count && result.is_a?(Hash)
-        case count
-        when 0
-          result = result["zero"]
-        when 1
-          result = result["one"]
-        else
-          result = result["many"]
-        end
-      end
-
-      if result.respond_to?(:match) && result.match(/%{\w+}/)
-        result = Utils.interpolate(result, options)
-      end
+      result = with_fallbacks(result, keys)
+      result = with_pluralization(result, options)
+      result = with_interpolation(result, options)
 
       result || options[:default]
     end
@@ -121,6 +104,40 @@ module MiniI18n
       else
         translations[locale] = new_translations
       end
+    end
+
+    def with_fallbacks(result, keys)
+      if fallbacks && result.empty?
+        keys[0] = default_locale.to_s
+        result = lookup(*keys)
+      end
+
+      result
+    end
+
+    def with_pluralization(result, options)
+      count = options[:count]
+
+      if count && result.is_a?(Hash)
+        case count
+        when 0
+          result = result["zero"]
+        when 1
+          result = result["one"]
+        else
+          result = result["many"]
+        end
+      end
+
+      result
+    end
+
+    def with_interpolation(result, options)
+      if result.respond_to?(:match) && result.match(/%{\w+}/)
+        result = Utils.interpolate(result, options)
+      end
+
+      result
     end
   end
 end
