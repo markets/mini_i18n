@@ -34,6 +34,7 @@ RSpec.describe MiniI18n::Localization do
 
     it 'to number' do
       expect(MiniI18n.l("1000000", type: :number)).to eq '1,000,000.0'
+      expect(MiniI18n.l("1000000", as: :currency)).to eq '1,000,000.0 $'
     end
   end
 
@@ -41,6 +42,12 @@ RSpec.describe MiniI18n::Localization do
     it 'uses defined format' do
       expect(MiniI18n.l(9000)).to eq '9,000'
       expect(MiniI18n.l(9000.50)).to eq '9,000.5'
+    end
+
+    it 'as' do
+      expect(MiniI18n.l(9000, as: :currency)).to eq '9,000 $'
+      expect(MiniI18n.l(9000, as: :currency, locale: :es)).to eq '9000 €'
+      expect(MiniI18n.l(125.5, as: :distance)).to eq 'Distance: 125.5 miles'
     end
   end
 end

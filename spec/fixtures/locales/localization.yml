@@ -15,3 +15,6 @@ en:
     format:
       delimiter: ','
       separator: '.'
+    as:
+      currency: '%{number} $'
+      distance: 'Distance: %{number} miles'

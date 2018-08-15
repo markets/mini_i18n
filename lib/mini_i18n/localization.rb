@@ -33,7 +33,13 @@ module MiniI18n
         "#{match}#{delimiter}"
       end
 
-      [integer, fractional].compact.join(separator)
+      number = [integer, fractional].compact.join(separator)
+
+      if as = options[:as]
+        number = MiniI18n.t("number.as.#{as}", number: number, locale: locale)
+      end
+
+      number
     end
 
     def localize_datetime(object, options)
@@ -54,7 +60,7 @@ module MiniI18n
     end
 
     def localize_string(string, options)
-      object = if options[:type] == :number
+      object = if options[:type] == :number || options[:as]
         string.to_f
       elsif options[:type] == :date
         Date.parse(string) rescue nil
