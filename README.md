@@ -2,12 +2,13 @@
 
 [![Gem](https://img.shields.io/gem/v/mini_i18n.svg?style=flat-square)](https://rubygems.org/gems/mini_i18n)
 [![Build Status](https://img.shields.io/travis/markets/mini_i18n.svg?style=flat-square)](https://travis-ci.org/markets/mini_i18n)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9d82e7151f8a5594da0f/maintainability)](https://codeclimate.com/github/markets/mini_i18n/maintainability)
 
 > Minimalistic I18n library for Ruby
 
-`MiniI18n` is a simple and flexible Ruby Internationalization library. It supports interpolations, pluralization, fallbacks, nested keys and more.
+`MiniI18n` is a simple and flexible Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
-Translations should be stored in YAML files and they will loaded in a in-memory `Hash`.
+Translations should be stored in YAML files and they will be loaded in an in-memory `Hash`.
 
 ```yaml
 en:
@@ -152,6 +153,68 @@ Then, you should call the method with the `count` option:
 => "1 unread notification"
 >> MiniI18n.t('notifications', count: 5)
 => "5 unread notifications"
+```
+
+### Localization
+
+You can also use the `MiniI18n.l` method to localize your dates, time and numbers.
+
+#### Dates and time
+
+It uses `strftime` under the hood. You should provide your localizations using the following format:
+
+```yaml
+en:
+  date:
+    formats:
+      default: "%A %d, %B, %Y"
+      short: "%d %b %y"
+```
+
+```ruby
+>> MiniI18n.l(Date.new(2018, 8, 15))
+=> "Wednesday 15, August, 2018"
+>> MiniI18n.l(Date.new(2018, 8, 15), format: :short)
+=> "15 Aug 18"
+```
+
+You can check a full example of all necessary keys [in this file](spec/fixtures/locales/localization.yml).
+
+#### Numbers
+
+You should provide the following keys:
+
+```yaml
+en:
+  number:
+    format:
+      delimiter: ','
+      separator: '.'
+    as:
+      currency: '%{number} $'
+```
+
+```ruby
+>> MiniI18n.l(1000.25)
+=> "1,000.25"
+>> MiniI18n.l(1000, as: :currency)
+=> "1,000 $"
+>> MiniI18n.l(1000, as: :currency, locale: :es)
+=> "1.000 €"
+```
+
+**TIP** By using the `:as` option you can build custom full sentences with localized numbers, like:
+
+```yaml
+en:
+  number:
+    as:
+      final_price: 'Final price: %{number} $'
+```
+
+```ruby
+>> MiniI18n.l(1000, as: :final_price)
+=> "Final price: 1,000 $"
 ```
 
 ## Development

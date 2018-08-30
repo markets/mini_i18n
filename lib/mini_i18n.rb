@@ -1,9 +1,12 @@
 require "yaml"
 require "mini_i18n/version"
 require "mini_i18n/utils"
+require "mini_i18n/localization"
 
 module MiniI18n
   class << self
+    include Localization
+
     DEFAULT_LOCALE = :en
     SEPARATOR = '.'
 
@@ -48,14 +51,7 @@ module MiniI18n
     def load_translations(path)
       Dir[path.to_s].each do |file|
         YAML.load_file(file).each do |locale, new_translations|
-          locale = locale.to_s
-          @@available_locales << locale unless available_locale?(locale)
-
-          if translations[locale]
-            translations[locale] = Utils.deep_merge(translations[locale], new_translations)
-          else
-            translations[locale] = new_translations
-          end
+          add_translations(locale.to_s, new_translations)
         end
       end
     end
@@ -65,7 +61,6 @@ module MiniI18n
 
       _locale = available_locale?(options[:locale]) || locale
       scope = options[:scope]
-      count = options[:count]
 
       keys = [_locale.to_s]
       keys << scope.to_s.split(SEPARATOR) if scope
@@ -74,25 +69,9 @@ module MiniI18n
 
       result = lookup(*keys)
 
-      if fallbacks && result.empty?
-        keys[0] = default_locale.to_s
-        result = lookup(*keys)
-      end
-
-      if count && result.is_a?(Hash)
-        case count
-        when 0
-          result = result["zero"]
-        when 1
-          result = result["one"]
-        else
-          result = result["many"]
-        end
-      end
-
-      if result.respond_to?(:match) && result.match(/%{\w+}/)
-        result = Utils.interpolate(result, options)
-      end
+      result = with_fallbacks(result, keys)
+      result = with_pluralization(result, options)
+      result = with_interpolation(result, options)
 
       result || options[:default]
     end
@@ -115,6 +94,50 @@ module MiniI18n
 
     def lookup(*keys)
       translations.dig(*keys)
+    end
+
+    def add_translations(locale, new_translations)
+      @@available_locales << locale unless available_locale?(locale)
+
+      if translations[locale]
+        translations[locale] = Utils.deep_merge(translations[locale], new_translations)
+      else
+        translations[locale] = new_translations
+      end
+    end
+
+    def with_fallbacks(result, keys)
+      if fallbacks && result.empty?
+        keys[0] = default_locale.to_s
+        result = lookup(*keys)
+      end
+
+      result
+    end
+
+    def with_pluralization(result, options)
+      count = options[:count]
+
+      if count && result.is_a?(Hash)
+        case count
+        when 0
+          result = result["zero"]
+        when 1
+          result = result["one"]
+        else
+          result = result["many"]
+        end
+      end
+
+      result
+    end
+
+    def with_interpolation(result, options)
+      if result.respond_to?(:match) && result.match(/%{\w+}/)
+        result = Utils.interpolate(result, options)
+      end
+
+      result
     end
   end
 end

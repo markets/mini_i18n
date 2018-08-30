@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0]
+
+- Localization support for dates, time and numbers
+
 ## [0.4.0]
 
 - Pluralization support
@@ -27,6 +31,7 @@ All notable changes to this project will be documented in this file.
 
 - First release :tada:
 
+[0.5.0]: https://github.com/markets/mini_i18n/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/markets/mini_i18n/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/markets/mini_i18n/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/markets/mini_i18n/compare/v0.2.1...v0.3.0

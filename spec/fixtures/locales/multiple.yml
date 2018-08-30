@@ -10,6 +10,9 @@ es:
   bye: "adiós"
   second_level:
     hello: "hola 2"
+  number:
+    as:
+      currency: '%{number} €'
 
 fr:
   hello: "bonjour"
