@@ -8,7 +8,7 @@
 
 `MiniI18n` is a simple and flexible Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
-Translations should be stored in YAML files and they will loaded in a in-memory `Hash`.
+Translations should be stored in YAML files and they will be loaded in an in-memory `Hash`.
 
 ```yaml
 en:
@@ -157,9 +157,11 @@ Then, you should call the method with the `count` option:
 
 ### Localization
 
+You can also use the `MiniI18n.l` method to localize your dates, time and numbers.
+
 #### Dates and time
 
-It uses `strftime` under the hood.
+It uses `strftime` under the hood. You should provide your localizations using the following format:
 
 ```yaml
 en:
@@ -176,7 +178,11 @@ en:
 => "15 Aug 18"
 ```
 
+You can check a full example of all necessary keys [in this file](spec/fixtures/locales/localization.yml).
+
 #### Numbers
+
+You should provide the following keys:
 
 ```yaml
 en:
@@ -195,6 +201,20 @@ en:
 => "1,000 $"
 >> MiniI18n.l(1000, as: :currency, locale: :es)
 => "1.000 €"
+```
+
+**TIP** By using the `:as` option you can build custom full sentences with localized numbers, like:
+
+```yaml
+en:
+  number:
+    as:
+      final_price: 'Final price: %{number} $'
+```
+
+```ruby
+>> MiniI18n.l(1000, as: :final_price)
+=> "Final price: 1,000 $"
 ```
 
 ## Development
