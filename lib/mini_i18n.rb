@@ -8,7 +8,7 @@ module MiniI18n
     include Localization
 
     DEFAULT_LOCALE = :en
-    SEPARATOR = '.'
+    DEFAULT_SEPARATOR = '.'
 
     attr_accessor :fallbacks
 
@@ -20,12 +20,8 @@ module MiniI18n
       @@default_locale = available_locale?(new_locale) || default_locale
     end
 
-    def default_available_locales
-      @@default_available_locales ||= translations.keys
-    end
-
     def available_locales
-      @@available_locales ||= default_available_locales
+      @@available_locales ||= translations.keys
     end
 
     def available_locales=(new_locales)
@@ -42,6 +38,14 @@ module MiniI18n
 
     def locale=(new_locale)
       set_locale(new_locale)
+    end
+
+    def separator
+      @@separator ||= DEFAULT_SEPARATOR
+    end
+
+    def separator=(new_separator)
+      @@separator = new_separator || DEFAULT_SEPARATOR
     end
 
     def configure
@@ -63,8 +67,8 @@ module MiniI18n
       scope = options[:scope]
 
       keys = [_locale.to_s]
-      keys << scope.to_s.split(SEPARATOR) if scope
-      keys << key.to_s.split(SEPARATOR)
+      keys << scope.to_s.split(separator) if scope
+      keys << key.to_s.split(separator)
       keys = keys.flatten
 
       result = lookup(*keys)
@@ -81,9 +85,11 @@ module MiniI18n
 
     def set_locale(new_locale)
       new_locale = new_locale.to_s
+
       if available_locale?(new_locale)
         Thread.current[:mini_i18n_locale] = new_locale
       end
+
       locale
     end
 

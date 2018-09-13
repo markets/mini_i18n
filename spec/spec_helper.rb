@@ -10,6 +10,7 @@ RSpec.configure do |config|
 
   config.before(:each) do
     MiniI18n.locale = :en
+    MiniI18n.separator = '.'
     MiniI18n.fallbacks = false
     MiniI18n.available_locales = [:en, :es, :fr]
   end

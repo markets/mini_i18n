@@ -37,6 +37,16 @@ RSpec.describe MiniI18n do
     end
   end
 
+  describe 'separator' do
+    it 'allows to customize separator for nested keys' do
+      MiniI18n.separator = ' '
+      expect(MiniI18n.t('second_level hello')).to eq 'hello 2'
+
+      MiniI18n.separator = '::'
+      expect(MiniI18n.t('second_level::hello')).to eq 'hello 2'
+    end
+  end
+
   describe 'translate' do
     it "simple key" do
       expect(MiniI18n.t(:hello)).to eq 'hello'

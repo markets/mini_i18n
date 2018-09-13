@@ -42,17 +42,20 @@ You should use the `configure` method to setup your environment:
 
 ```ruby
 MiniI18n.configure do |config|
-  # path to your translation files
+  # Path to your translation files.
   config.load_translations(__dir__ + '/translations/*.yml')
 
-  # default locale
-  config.default_locale = :en
+  # Default locale.
+  config.default_locale = :pt
 
-  # available locales in your application
-  config.available_locales = [:en, :es, :fr]
+  # Available locales in your application.
+  config.available_locales = [:en, :es, :fr, :pt]
 
-  # if given key is empty, defaults to the default_locale
+  # If given key is empty, defaults to the default_locale.
   config.fallbacks = true
+
+  # Custom separator for nested keys.
+  config.separator = '::'
 end
 ```
 
