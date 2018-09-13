@@ -6,7 +6,7 @@
 
 > Minimalistic I18n library for Ruby
 
-`MiniI18n` is a simple and flexible Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
+`MiniI18n` is a simple, flexible and fast Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
 Translations should be stored in YAML files and they will be loaded in an in-memory `Hash`.
 
@@ -157,7 +157,7 @@ Then, you should call the method with the `count` option:
 
 ### Localization
 
-You can also use the `MiniI18n.l` method to localize your dates, time and numbers.
+You can also use the `MiniI18n.l` (or the long version `MiniI18n.localize`) method to localize your dates, time and numbers.
 
 #### Dates and time
 
@@ -178,11 +178,11 @@ en:
 => "15 Aug 18"
 ```
 
-You can check a full example of all necessary keys [in this file](spec/fixtures/locales/localization.yml).
+You can check a full example of all necessary and useful keys [in this file](spec/fixtures/locales/localization.yml).
 
 #### Numbers
 
-You should provide the following keys:
+To localize your numbers, you can provide the following keys:
 
 ```yaml
 en:
@@ -203,7 +203,7 @@ en:
 => "1.000 €"
 ```
 
-**TIP** By using the `:as` option you can build custom full sentences with localized numbers, like:
+**TIP** By using the `:as` option you can build custom full sentences with formatted numbers, like:
 
 ```yaml
 en:
