@@ -1,3 +1,6 @@
+require 'simplecov'
+SimpleCov.start { add_filter 'spec/' }
+
 require "mini_i18n"
 
 RSpec.configure do |config|
