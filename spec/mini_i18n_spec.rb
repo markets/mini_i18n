@@ -57,9 +57,19 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.t('second_level.hello')).to eq 'hello 2'
     end
 
+    it "multiple keys" do
+      expect(MiniI18n.t([:hello, :bye])).to eq ['hello', 'bye']
+      expect(MiniI18n.t([:hello, :bye], locale: :fr)).to eq ['bonjour', 'au revoir']
+    end
+
     it "locale" do
       expect(MiniI18n.t('hello', locale: :fr)).to eq 'bonjour'
       expect(MiniI18n.t('hello', locale: :es)).to eq 'hola'
+    end
+
+    it "multiple locales" do
+      expect(MiniI18n.t(:hello, locale: [:en, :fr, :es])).to eq ['hello', 'bonjour', 'hola']
+      expect(MiniI18n.t(:hello_interpolation, name: 'world', locale: [:en])).to eq ['hello world']
     end
 
     it "scope" do

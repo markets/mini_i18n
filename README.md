@@ -66,7 +66,7 @@ MiniI18n.load_translations(__dir__ + '/translations/*.yml')
 MiniI18n.default_locale = :en
 ```
 
-Basic example usage:
+Examples usage:
 
 ```ruby
 >> MiniI18n.t(:hello)
@@ -79,6 +79,8 @@ Basic example usage:
 => "Bonjour"
 >> MiniI18n.t(:hellooo)
 => nil
+>> MiniI18n.t([:hello, :bye], locale: :en)
+=> ["Hello", "Bye"]
 ```
 
 The `t` method can be also used as `translate`:
@@ -94,6 +96,13 @@ It accepts the following options:
 ```ruby
 >> MiniI18n.t(:hello, locale: :es)
 => "Hola"
+```
+
+You can also get multiple locales at once by passing an array:
+
+```ruby
+>> MiniI18n.t(:hello, locale: [:en, :fr, :es])
+=> ["Hello", "Bonjour", "Hola"]
 ```
 
 * `scope`

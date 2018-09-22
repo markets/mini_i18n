@@ -62,6 +62,8 @@ module MiniI18n
 
     def translate(key, options = {})
       return if key.empty? || translations.empty?
+      return multiple_translate(key, options) if key.is_a?(Array)
+      return multiple_locales(key, options) if options[:locale].is_a?(Array)
 
       _locale = available_locale?(options[:locale]) || locale
       scope = options[:scope]
@@ -144,6 +146,18 @@ module MiniI18n
       end
 
       result
+    end
+
+    def multiple_translate(keys, options)
+      keys.map do |key|
+        t(key, options)
+      end
+    end
+
+    def multiple_locales(key, options)
+      options[:locale].map do |_locale|
+        t(key, options.merge(locale: _locale))
+      end
     end
   end
 end
