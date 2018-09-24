@@ -6,6 +6,10 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.translations["en"]).to include 'bye'
     end
 
+    it "allows to load translations from JSON" do
+      expect(MiniI18n.t(:from_json)).to eq 'from JSON'
+    end
+
     it "does not raise if path is nil" do
       expect(MiniI18n.load_translations(nil)).to eq []
     end

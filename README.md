@@ -8,7 +8,7 @@
 
 `MiniI18n` is a simple, flexible and fast Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
-Translations should be stored in YAML files and they will be loaded in an in-memory `Hash`.
+Translations should be stored in `YAML` or `JSON` files and they will be loaded in an in-memory `Hash`.
 
 ```yaml
 en:
@@ -43,7 +43,7 @@ You should use the `configure` method to setup your environment:
 ```ruby
 MiniI18n.configure do |config|
   # Path to your translation files.
-  config.load_translations(__dir__ + '/translations/*.yml')
+  config.load_translations(__dir__ + '/translations/*')
 
   # Default locale.
   config.default_locale = :pt
@@ -62,7 +62,7 @@ end
 You can also use the following format:
 
 ```ruby
-MiniI18n.load_translations(__dir__ + '/translations/*.yml')
+MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
 ```
 
