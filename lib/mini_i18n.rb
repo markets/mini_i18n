@@ -62,6 +62,7 @@ module MiniI18n
 
     def translate(key, options = {})
       return if key.empty? || translations.empty?
+
       return multiple_translate(key, options) if key.is_a?(Array)
       return multiple_locales(key, options) if options[:locale].is_a?(Array)
 

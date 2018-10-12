@@ -77,7 +77,7 @@ Examples usage:
 => :fr
 >> MiniI18n.t(:hello)
 => "Bonjour"
->> MiniI18n.t(:hellooo)
+>> MiniI18n.t(:non_existent_key)
 => nil
 >> MiniI18n.t([:hello, :bye], locale: :en)
 => ["Hello", "Bye"]
@@ -117,7 +117,7 @@ You can also get multiple locales at once by passing an array:
 * `default`
 
 ```ruby
->> MiniI18n.t(:hellooo, default: 'default value')
+>> MiniI18n.t(:non_existent_key, default: 'default value')
 => "default value"
 ```
 
