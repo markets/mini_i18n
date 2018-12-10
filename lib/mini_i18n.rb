@@ -2,6 +2,7 @@ require "yaml"
 require "mini_i18n/version"
 require "mini_i18n/utils"
 require "mini_i18n/localization"
+require "mini_i18n/pluralization"
 
 module MiniI18n
   class << self
@@ -48,6 +49,14 @@ module MiniI18n
       @@separator = new_separator || DEFAULT_SEPARATOR
     end
 
+    def pluralization_rules
+      @@pluralization_rules ||= {}
+    end
+
+    def pluralization_rules=(new_rules)
+      @@pluralization_rules = new_rules
+    end
+
     def configure
       yield(self) if block_given?
     end
@@ -77,7 +86,7 @@ module MiniI18n
       result = lookup(*keys)
 
       result = with_fallbacks(result, keys)
-      result = with_pluralization(result, options)
+      result = with_pluralization(result, options, _locale)
       result = with_interpolation(result, options)
 
       result || options[:default]
@@ -124,18 +133,11 @@ module MiniI18n
       result
     end
 
-    def with_pluralization(result, options)
+    def with_pluralization(result, options, locale)
       count = options[:count]
 
       if count && result.is_a?(Hash)
-        case count
-        when 0
-          result = result["zero"]
-        when 1
-          result = result["one"]
-        else
-          result = result["many"]
-        end
+        result = Pluralization.pluralize(result, count, locale)
       end
 
       result

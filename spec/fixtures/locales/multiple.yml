@@ -13,6 +13,9 @@ es:
   number:
     as:
       currency: '%{number} €'
+  notifications:
+    zero: 'no hay nuevas notificaciones'
+    other: 'tienes notificaciones por leer'
 
 fr:
   hello: "bonjour"

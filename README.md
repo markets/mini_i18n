@@ -146,14 +146,14 @@ en:
 
 ### Pluralization
 
-You should define your plurals in the following format (supported keys: `zero`, `one` and `many`):
+You should define your plurals in the following format (supported keys: `zero`, `one` and `other`):
 
 ```yaml
 en:
   notifications:
     zero: 'no unread notifications'
     one: '1 unread notification'
-    many: '%{count} unread notifications'
+    other: '%{count} unread notifications'
 ```
 
 Then, you should call the method with the `count` option:
@@ -222,11 +222,14 @@ en:
   number:
     as:
       final_price: 'Final price: %{number} $'
+      percentage: '%{number}%'
 ```
 
 ```ruby
 >> MiniI18n.l(1000, as: :final_price)
 => "Final price: 1,000 $"
+>> MiniI18n.l(70.5, as: :percentage)
+=> "70.5%"
 ```
 
 ## Development

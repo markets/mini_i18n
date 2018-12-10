@@ -7,4 +7,4 @@ en:
   notifications:
     zero: 'no unread notifications'
     one: '1 unread notification'
-    many: '%{count} unread notifications'
+    other: '%{count} unread notifications'
