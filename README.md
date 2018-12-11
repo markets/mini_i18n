@@ -56,6 +56,12 @@ MiniI18n.configure do |config|
 
   # Custom separator for nested keys.
   config.separator = '::'
+
+  # Custom pluralization rules, by locale.
+  config.pluralization_rules = {
+    es: -> (n) { n == 0 ? 'zero' : 'other' },
+    fr: -> (n) { ... }
+  }
 end
 ```
 
@@ -146,14 +152,14 @@ en:
 
 ### Pluralization
 
-You should define your plurals in the following format (supported keys: `zero`, `one` and `many`):
+You should define your plurals in the following format (default pluralization rule accepts the keys: `zero`, `one` and `other`):
 
 ```yaml
 en:
   notifications:
     zero: 'no unread notifications'
     one: '1 unread notification'
-    many: '%{count} unread notifications'
+    other: '%{count} unread notifications'
 ```
 
 Then, you should call the method with the `count` option:
@@ -165,6 +171,45 @@ Then, you should call the method with the `count` option:
 => "1 unread notification"
 >> MiniI18n.t('notifications', count: 5)
 => "5 unread notifications"
+```
+
+#### Custom pluralization rules
+
+You are also able to customize how plurals are handled, by locale, defining custom pluralization rules. Example:
+
+```ruby
+MiniI18n.pluralization_rules = {
+  es: -> (n) {
+    if (1..3).include?(n)
+      'few'
+    elsif (4..10).include?(n)
+      'many'
+    else
+      'other'
+    end
+  }
+}
+```
+
+Now, in your translation files, you should define content for those keys:
+
+```yaml
+es:
+  notifications:
+    few: 'pocas notificaciones nuevas ...'
+    many: 'muchas notificaciones, %{count}!'
+    other: '%{count} notificaciones'
+```
+
+And then, you get:
+
+```ruby
+>> MiniI18n.t('notifications', count: 0)
+=> "0 notificaciones"
+>> MiniI18n.t('notifications', count: 2)
+=> "pocas notificaciones nuevas ..."
+>> MiniI18n.t('notifications', count: 5)
+=> "muchas notificaciones, 5!"
 ```
 
 ### Localization
@@ -222,11 +267,14 @@ en:
   number:
     as:
       final_price: 'Final price: %{number} $'
+      percentage: '%{number}%'
 ```
 
 ```ruby
 >> MiniI18n.l(1000, as: :final_price)
 => "Final price: 1,000 $"
+>> MiniI18n.l(70.5, as: :percentage)
+=> "70.5%"
 ```
 
 ## Development

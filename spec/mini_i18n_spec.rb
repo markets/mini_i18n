@@ -105,5 +105,16 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.t('notifications', count: 1)).to eq '1 unread notification'
       expect(MiniI18n.t('notifications', count: 5)).to eq '5 unread notifications'
     end
+
+    it "pluralization with custom rules" do
+      MiniI18n.pluralization_rules = {
+        es: -> (n) {
+          n == 0 ? 'zero' : 'other'
+        }
+      }
+
+      expect(MiniI18n.t('notifications', count: 0, locale: :es)).to eq 'no hay nuevas notificaciones'
+      expect(MiniI18n.t('notifications', count: 1, locale: :es)).to eq 'tienes notificaciones por leer'
+    end
   end
 end
