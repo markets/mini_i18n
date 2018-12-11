@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0]
+
+- Custom pluralization rules
+- Define required Ruby version in `gemspec`
+
 ## [0.7.0]
 
 - Allow multiple translations by keys and locales
@@ -39,6 +44,7 @@ All notable changes to this project will be documented in this file.
 
 - First release :tada:
 
+[0.8.0]: https://github.com/markets/mini_i18n/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/markets/mini_i18n/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/markets/mini_i18n/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/markets/mini_i18n/compare/v0.4.0...v0.5.0
