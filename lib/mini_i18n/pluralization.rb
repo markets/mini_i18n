@@ -8,7 +8,7 @@ module MiniI18n
     private
 
     def self.default_rule
-      -> (n) do
+      -> (n) {
         case n
         when 0
           'zero'
@@ -17,7 +17,7 @@ module MiniI18n
         else
           'other'
         end
-      end
+      }
     end
   end
 end
