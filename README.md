@@ -85,8 +85,10 @@ Examples usage:
 => "Bonjour"
 >> MiniI18n.t(:non_existent_key)
 => nil
->> MiniI18n.t([:hello, :bye], locale: :en)
+>> MiniI18n.t([:hello, :bye])
 => ["Hello", "Bye"]
+>> MiniI18n.t('errors.not_found.title')
+=> "Not found!"
 ```
 
 The `t` method can be also used as `translate`:
