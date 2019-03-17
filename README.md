@@ -159,7 +159,7 @@ You should define your plurals in the following format (default pluralization ru
 ```yaml
 en:
   notifications:
-    zero: 'no unread notifications'
+    zero: 'good job! no new notifications'
     one: '1 unread notification'
     other: '%{count} unread notifications'
 ```
@@ -168,7 +168,7 @@ Then, you should call the method with the `count` option:
 
 ```ruby
 >> MiniI18n.t('notifications', count: 0)
-=> "no unread notifications"
+=> "good job! no new notifications"
 >> MiniI18n.t('notifications', count: 1)
 => "1 unread notification"
 >> MiniI18n.t('notifications', count: 5)
@@ -182,7 +182,9 @@ You are also able to customize how plurals are handled, by locale, defining cust
 ```ruby
 MiniI18n.pluralization_rules = {
   es: -> (n) {
-    if (1..3).include?(n)
+    if n == 0
+      'zero'
+    elsif (1..3).include?(n)
       'few'
     elsif (4..10).include?(n)
       'many'
@@ -198,20 +200,23 @@ Now, in your translation files, you should define content for those keys:
 ```yaml
 es:
   notifications:
-    few: 'pocas notificaciones nuevas ...'
-    many: 'muchas notificaciones, %{count}!'
-    other: '%{count} notificaciones'
+    zero: 'no tienes nuevas notificaciones'
+    few: 'tienes algunas notificaciones pendientes ...'
+    many: 'tienes %{count} notificaciones!'
+    other: 'alerta!! %{count} notificaciones!'
 ```
 
 And then, you get:
 
 ```ruby
 >> MiniI18n.t('notifications', count: 0)
-=> "0 notificaciones"
+=> "no tienes nuevas notificaciones"
 >> MiniI18n.t('notifications', count: 2)
-=> "pocas notificaciones nuevas ..."
+=> "tienes algunas notificaciones pendientes ..."
 >> MiniI18n.t('notifications', count: 5)
-=> "muchas notificaciones, 5!"
+=> "tienes 5 notificaciones!"
+>> MiniI18n.t('notifications', count: 20)
+=> "alerta!! 20 notificaciones!"
 ```
 
 ### Localization
