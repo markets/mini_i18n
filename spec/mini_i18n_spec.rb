@@ -46,8 +46,8 @@ RSpec.describe MiniI18n do
       MiniI18n.separator = ' '
       expect(MiniI18n.t('second_level hello')).to eq 'hello 2'
 
-      MiniI18n.separator = '::'
-      expect(MiniI18n.t('second_level::hello')).to eq 'hello 2'
+      MiniI18n.separator = '/'
+      expect(MiniI18n.t('second_level/hello')).to eq 'hello 2'
     end
   end
 

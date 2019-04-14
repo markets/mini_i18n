@@ -55,7 +55,7 @@ MiniI18n.configure do |config|
   config.fallbacks = true
 
   # Custom separator for nested keys.
-  config.separator = '::'
+  config.separator = '/'
 
   # Custom pluralization rules, by locale.
   config.pluralization_rules = {
@@ -87,7 +87,7 @@ Examples usage:
 => nil
 >> MiniI18n.t([:hello, :bye])
 => ["Hello", "Bye"]
->> MiniI18n.t('errors.not_found.title')
+>> MiniI18n.t('app.controllers.not_found')
 => "Not found!"
 ```
 
@@ -122,6 +122,8 @@ You can also get multiple locales at once by passing an array:
 => "Welcome"
 ```
 
+Read more details in the [Nested Keys](#nested-keys) section.
+
 * `default`
 
 ```ruby
@@ -131,11 +133,28 @@ You can also get multiple locales at once by passing an array:
 
 * `count`
 
-Read more details in the [Pluralization section](#pluralization).
+Read more details in the [Pluralization](#pluralization) section.
 
 ```ruby
 >> MiniI18n.t('notifications', count: 0)
 => "no unread notifications"
+```
+
+### Nested Keys
+
+You can use a custom separator when accessing nested keys (default separator is `.`):
+
+```yaml
+en:
+  app:
+    controllers:
+      not_found: "Not found!"
+```
+
+```ruby
+MiniI18n.t('app.controllers.not_found')
+MiniI18n.separator = '/'
+MiniI18n.t('app/controllers/not_found')
 ```
 
 ### Interpolation
