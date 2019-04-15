@@ -122,7 +122,7 @@ You can also get multiple locales at once by passing an array:
 => "Welcome"
 ```
 
-Read more details in the [Nested Keys](#nested-keys) section.
+Read more details about nested keys in [this section](#nested-keys).
 
 * `default`
 
@@ -133,12 +133,12 @@ Read more details in the [Nested Keys](#nested-keys) section.
 
 * `count`
 
-Read more details in the [Pluralization](#pluralization) section.
-
 ```ruby
 >> MiniI18n.t('notifications', count: 0)
 => "no unread notifications"
 ```
+
+Read more details in the [Pluralization](#pluralization) section.
 
 ### Nested Keys
 
