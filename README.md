@@ -1,7 +1,7 @@
 # `MiniI18n`
 
 [![Gem](https://img.shields.io/gem/v/mini_i18n.svg?style=flat-square)](https://rubygems.org/gems/mini_i18n)
-[![Build Status](https://img.shields.io/travis/markets/mini_i18n.svg?style=flat-square)](https://travis-ci.org/markets/mini_i18n)
+[![Build Status](https://github.com/markets/mini_i18n/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/markets/mini_i18n/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9d82e7151f8a5594da0f/maintainability)](https://codeclimate.com/github/markets/mini_i18n/maintainability)
 
 > Minimalistic I18n library for Ruby

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Next
+
+- Move from Travis CI to GitHub Actions
+
 ## [0.8.0]
 
 - Custom pluralization rules
