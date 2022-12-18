@@ -62,7 +62,7 @@ module MiniI18n
     end
 
     def load_translations(path)
-      Dir[path.to_s].each do |file|
+      Dir[path.to_s].sort.each do |file|
         YAML.load_file(file).each do |locale, new_translations|
           add_translations(locale.to_s, new_translations)
         end
