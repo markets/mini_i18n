@@ -45,6 +45,9 @@ MiniI18n.configure do |config|
   # Path to your translation files.
   config.load_translations(__dir__ + '/translations/*')
 
+  # Load built-in localization defaults for common languages.
+  config.load_default_locales(:es, :fr, :de, :pt, :it, :nl)
+
   # Default locale.
   config.default_locale = :pt
 
@@ -70,6 +73,48 @@ You can also use the following format:
 ```ruby
 MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
+```
+
+### Loading Default Locales
+
+MiniI18n provides built-in localization defaults for common languages. You can load these defaults using the `load_default_locales` method:
+
+```ruby
+# Load defaults for Spanish and French
+MiniI18n.load_default_locales(:es, :fr)
+
+# Load defaults for multiple languages at once
+MiniI18n.load_default_locales(:es, :fr, :de, :pt, :it, :nl)
+```
+
+The following locales are available by default:
+- `:es` - Spanish
+- `:fr` - French
+- `:de` - German
+- `:pt` - Portuguese
+- `:it` - Italian
+- `:nl` - Dutch
+
+These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions:
+
+```ruby
+MiniI18n.load_default_locales(:es, :fr)
+
+# Spanish date formatting
+MiniI18n.l(Date.new(2023, 12, 25), locale: :es)
+# => "25/12/2023"
+
+# French date formatting
+MiniI18n.l(Date.new(2023, 12, 25), locale: :fr)
+# => "lundi 25 décembre 2023"
+
+# Spanish number formatting
+MiniI18n.l(1234.56, locale: :es)
+# => "1.234,56"
+
+# French number formatting
+MiniI18n.l(1234.56, locale: :fr)
+# => "1 234,56"
 ```
 
 Examples usage:

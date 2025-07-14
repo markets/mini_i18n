@@ -27,7 +27,7 @@ module MiniI18n
       locale = options[:locale]
       delimiter = MiniI18n.t("number.format.delimiter", locale: locale)
       separator = MiniI18n.t("number.format.separator", locale: locale)
-      integer, fractional = number.to_s.split(separator)
+      integer, fractional = number.to_s.split('.')
 
       integer.to_s.gsub!(DELIMITER_REGEX) do |match|
         "#{match}#{delimiter}"
