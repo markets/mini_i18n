@@ -50,7 +50,7 @@ MiniI18n.configure do |config|
 
   # Available locales in your application.
   # Built-in localization defaults for common languages are automatically loaded.
-  config.available_locales = [:en, :es, :fr, :pt]
+  config.available_locales = [:en, :es, :fr, :pt, :zh, :ja]
 
   # If given key is empty, defaults to the default_locale.
   config.fallbacks = true
@@ -79,7 +79,7 @@ MiniI18n provides built-in localization defaults for common languages. These def
 
 ```ruby
 # Built-in localization defaults are automatically loaded for available locales
-MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl]
+MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl, :zh, :ja]
 ```
 
 The following locales are available by default:
@@ -89,12 +89,14 @@ The following locales are available by default:
 - `:pt` - Portuguese
 - `:it` - Italian
 - `:nl` - Dutch
+- `:zh` - Chinese
+- `:ja` - Japanese
 
 These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions:
 
 ```ruby
 # Set available locales (automatic loading happens here)
-MiniI18n.available_locales = [:en, :es, :fr]
+MiniI18n.available_locales = [:en, :es, :fr, :zh, :ja]
 
 # Spanish date formatting
 MiniI18n.l(Date.new(2023, 12, 25), locale: :es)
@@ -104,6 +106,14 @@ MiniI18n.l(Date.new(2023, 12, 25), locale: :es)
 MiniI18n.l(Date.new(2023, 12, 25), locale: :fr)
 # => "lundi 25 décembre 2023"
 
+# Chinese date formatting
+MiniI18n.l(Date.new(2023, 12, 25), locale: :zh)
+# => "2023年12月25日"
+
+# Japanese date formatting
+MiniI18n.l(Date.new(2023, 12, 25), locale: :ja)
+# => "2023年12月25日"
+
 # Spanish number formatting
 MiniI18n.l(1234.56, locale: :es)
 # => "1.234,56"
@@ -111,6 +121,14 @@ MiniI18n.l(1234.56, locale: :es)
 # French number formatting
 MiniI18n.l(1234.56, locale: :fr)
 # => "1 234,56"
+
+# Chinese number formatting
+MiniI18n.l(1234.56, locale: :zh)
+# => "1,234.56"
+
+# Japanese number formatting
+MiniI18n.l(1234.56, locale: :ja)
+# => "1,234.56"
 ```
 
 Examples usage:

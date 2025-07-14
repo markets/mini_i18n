@@ -8,7 +8,7 @@ RSpec.describe "Default Locales Integration" do
     @original_translations = MiniI18n.translations.dup
     @original_available_locales = MiniI18n.available_locales.dup
     # Use automatic loading by setting available_locales
-    MiniI18n.available_locales = [:es, :fr, :de, :pt, :it, :nl]
+    MiniI18n.available_locales = [:es, :fr, :de, :pt, :it, :nl, :zh, :ja]
   end
 
   after(:each) do
@@ -25,6 +25,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, locale: :pt)).to eq("segunda-feira, 25 de dezembro de 2023")
       expect(MiniI18n.l(date, locale: :it)).to eq("lunedì 25 dicembre 2023")
       expect(MiniI18n.l(date, locale: :nl)).to eq("maandag 25 december 2023")
+      expect(MiniI18n.l(date, locale: :zh)).to eq("2023年12月25日")
+      expect(MiniI18n.l(date, locale: :ja)).to eq("2023年12月25日")
     end
 
     it "formats short dates according to each locale" do
@@ -34,6 +36,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, format: :short, locale: :pt)).to eq("25/12/23")
       expect(MiniI18n.l(date, format: :short, locale: :it)).to eq("25/12/23")
       expect(MiniI18n.l(date, format: :short, locale: :nl)).to eq("25-12-23")
+      expect(MiniI18n.l(date, format: :short, locale: :zh)).to eq("23年12月25日")
+      expect(MiniI18n.l(date, format: :short, locale: :ja)).to eq("23年12月25日")
     end
   end
 
@@ -45,6 +49,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(number, locale: :pt)).to eq("1.234,56")
       expect(MiniI18n.l(number, locale: :it)).to eq("1.234,56")
       expect(MiniI18n.l(number, locale: :nl)).to eq("1.234,56")
+      expect(MiniI18n.l(number, locale: :zh)).to eq("1,234.56")
+      expect(MiniI18n.l(number, locale: :ja)).to eq("1,234.56")
     end
   end
 

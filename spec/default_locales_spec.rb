@@ -65,12 +65,30 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.translations['nl']['date']['day_names']).to include('zondag', 'maandag')
     end
 
-    it 'automatically loads multiple locales at once' do
-      MiniI18n.available_locales = [:es, :fr]
+    it 'automatically loads Chinese locale defaults when set in available_locales' do
+      MiniI18n.available_locales = [:zh]
       
-      expect(MiniI18n.available_locales).to include('es', 'fr')
+      expect(MiniI18n.available_locales).to include('zh')
+      expect(MiniI18n.translations['zh']).to have_key('date')
+      expect(MiniI18n.translations['zh']['date']['day_names']).to include('星期日', '星期一')
+    end
+
+    it 'automatically loads Japanese locale defaults when set in available_locales' do
+      MiniI18n.available_locales = [:ja]
+      
+      expect(MiniI18n.available_locales).to include('ja')
+      expect(MiniI18n.translations['ja']).to have_key('date')
+      expect(MiniI18n.translations['ja']['date']['day_names']).to include('日曜日', '月曜日')
+    end
+
+    it 'automatically loads multiple locales at once' do
+      MiniI18n.available_locales = [:es, :fr, :zh, :ja]
+      
+      expect(MiniI18n.available_locales).to include('es', 'fr', 'zh', 'ja')
       expect(MiniI18n.translations['es']['date']['day_names']).to include('domingo')
       expect(MiniI18n.translations['fr']['date']['day_names']).to include('dimanche')
+      expect(MiniI18n.translations['zh']['date']['day_names']).to include('星期日')
+      expect(MiniI18n.translations['ja']['date']['day_names']).to include('日曜日')
     end
 
     it 'handles non-existent locales gracefully' do
