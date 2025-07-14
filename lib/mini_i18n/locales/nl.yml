@@ -15,6 +15,3 @@ nl:
     format:
       delimiter: '.'
       separator: ','
-    as:
-      currency: '€ %{number}'
-      distance: 'Afstand: %{number} km'

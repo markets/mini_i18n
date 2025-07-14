@@ -15,6 +15,3 @@ pt:
     format:
       delimiter: '.'
       separator: ','
-    as:
-      currency: '%{number} €'
-      distance: 'Distância: %{number} km'

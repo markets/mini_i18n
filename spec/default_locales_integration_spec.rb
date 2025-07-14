@@ -7,7 +7,8 @@ RSpec.describe "Default Locales Integration" do
   before(:each) do
     @original_translations = MiniI18n.translations.dup
     @original_available_locales = MiniI18n.available_locales.dup
-    MiniI18n.load_default_locales(:es, :fr, :de, :pt, :it, :nl)
+    # Use automatic loading by setting available_locales
+    MiniI18n.available_locales = [:es, :fr, :de, :pt, :it, :nl]
   end
 
   after(:each) do
@@ -44,15 +45,6 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(number, locale: :pt)).to eq("1.234,56")
       expect(MiniI18n.l(number, locale: :it)).to eq("1.234,56")
       expect(MiniI18n.l(number, locale: :nl)).to eq("1.234,56")
-    end
-
-    it "formats currency according to each locale" do
-      expect(MiniI18n.l(number, as: :currency, locale: :es)).to eq("1.234,56 €")
-      expect(MiniI18n.l(number, as: :currency, locale: :fr)).to eq("1 234,56 €")
-      expect(MiniI18n.l(number, as: :currency, locale: :de)).to eq("1.234,56 €")
-      expect(MiniI18n.l(number, as: :currency, locale: :pt)).to eq("1.234,56 €")
-      expect(MiniI18n.l(number, as: :currency, locale: :it)).to eq("1.234,56 €")
-      expect(MiniI18n.l(number, as: :currency, locale: :nl)).to eq("€ 1.234,56")
     end
   end
 

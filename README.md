@@ -45,13 +45,11 @@ MiniI18n.configure do |config|
   # Path to your translation files.
   config.load_translations(__dir__ + '/translations/*')
 
-  # Load built-in localization defaults for common languages.
-  config.load_default_locales(:es, :fr, :de, :pt, :it, :nl)
-
   # Default locale.
   config.default_locale = :pt
 
   # Available locales in your application.
+  # Built-in localization defaults for common languages are automatically loaded.
   config.available_locales = [:en, :es, :fr, :pt]
 
   # If given key is empty, defaults to the default_locale.
@@ -75,16 +73,13 @@ MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
 ```
 
-### Loading Default Locales
+### Automatic Loading of Default Locales
 
-MiniI18n provides built-in localization defaults for common languages. You can load these defaults using the `load_default_locales` method:
+MiniI18n provides built-in localization defaults for common languages. These defaults are automatically loaded when you set the `available_locales` configuration:
 
 ```ruby
-# Load defaults for Spanish and French
-MiniI18n.load_default_locales(:es, :fr)
-
-# Load defaults for multiple languages at once
-MiniI18n.load_default_locales(:es, :fr, :de, :pt, :it, :nl)
+# Built-in localization defaults are automatically loaded for available locales
+MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl]
 ```
 
 The following locales are available by default:
@@ -98,7 +93,8 @@ The following locales are available by default:
 These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions:
 
 ```ruby
-MiniI18n.load_default_locales(:es, :fr)
+# Set available locales (automatic loading happens here)
+MiniI18n.available_locales = [:en, :es, :fr]
 
 # Spanish date formatting
 MiniI18n.l(Date.new(2023, 12, 25), locale: :es)
