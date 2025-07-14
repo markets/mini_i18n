@@ -3,7 +3,7 @@ require "mini_i18n/version"
 require "mini_i18n/utils"
 require "mini_i18n/localization"
 require "mini_i18n/pluralization"
-require "mini_i18n/kernel"
+require "mini_i18n/kernel_extensions"
 
 module MiniI18n
   class << self

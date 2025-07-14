@@ -5,15 +5,7 @@ module Kernel
     MiniI18n.t(*args)
   end
   
-  def t(*args)
-    MiniI18n.t(*args)
-  end
-  
   def L(*args)
-    MiniI18n.l(*args)
-  end
-  
-  def l(*args)
     MiniI18n.l(*args)
   end
 end

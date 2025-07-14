@@ -12,18 +12,6 @@ RSpec.describe 'Global shortcuts' do
     end
   end
 
-  describe 't method' do
-    it 'acts as a shortcut for MiniI18n.t' do
-      expect(t(:hello)).to eq 'hello'
-      expect(t(:hello, locale: :es)).to eq 'hola'
-    end
-    
-    it 'supports all the same options as MiniI18n.t' do
-      expect(t('hello_interpolation', name: 'world')).to eq 'hello world'
-      expect(t('notifications', count: 0)).to eq 'no unread notifications'
-    end
-  end
-
   describe 'L method' do
     it 'acts as a shortcut for MiniI18n.l' do
       expect(L(1000.25)).to eq '1,000.25'
@@ -31,16 +19,6 @@ RSpec.describe 'Global shortcuts' do
     
     it 'supports all the same options as MiniI18n.l' do
       expect(L(1000, as: :currency)).to eq '1,000 $'
-    end
-  end
-
-  describe 'l method' do
-    it 'acts as a shortcut for MiniI18n.l' do
-      expect(l(1000.25)).to eq '1,000.25'
-    end
-    
-    it 'supports all the same options as MiniI18n.l' do
-      expect(l(1000, as: :currency)).to eq '1,000 $'
     end
   end
 end
