@@ -97,28 +97,11 @@ The `t` method can be also used as `translate`:
 MiniI18n.translate(:hello)
 ```
 
-### Global shortcuts
-
-For convenience, `MiniI18n` provides global shortcuts that can be used anywhere in your application:
-
-* `T()` - shortcut for `MiniI18n.t()`
-* `L()` - shortcut for `MiniI18n.l()`
-
-These shortcuts work exactly like their full counterparts:
+The `t` method can be also used as global shortcut `T()`:
 
 ```ruby
-# Translation shortcuts
 T(:hello)
-T(:hello, locale: :fr)
-T('hello_interpolation', name: 'world')
-T('notifications', count: 1)
-
-# Localization shortcuts  
-L(1000.25)
-L(1000, as: :currency)
 ```
-
-These global methods are injected into the `Kernel` module, making them available throughout your application without needing to prefix them with `MiniI18n.`.
 
 It accepts the following options:
 
@@ -264,6 +247,8 @@ And then, you get:
 ### Localization
 
 You can also use the `MiniI18n.l` (or the long version `MiniI18n.localize`) method to localize your dates, time and numbers.
+
+The `l` method can be also used as global shortcut `L()`:
 
 #### Dates and time
 
