@@ -91,10 +91,16 @@ Examples usage:
 => "Not found!"
 ```
 
-The `t` method can be also used as `translate`:
+The `t()` method can be also used as `translate()`:
 
 ```ruby
 MiniI18n.translate(:hello)
+```
+
+Or even using the global shortcut `T()`:
+
+```ruby
+T(:hello)
 ```
 
 It accepts the following options:
@@ -240,7 +246,7 @@ And then, you get:
 
 ### Localization
 
-You can also use the `MiniI18n.l` (or the long version `MiniI18n.localize`) method to localize your dates, time and numbers.
+You can also use the `MiniI18n.l()` (or the long version `MiniI18n.localize()` or the global shorcut `L()`) method to localize your dates, time and numbers.
 
 #### Dates and time
 
