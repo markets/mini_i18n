@@ -25,7 +25,7 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, locale: :it)).to eq("lunedì 25 dicembre 2023")
       expect(MiniI18n.l(date, locale: :nl)).to eq("maandag 25 december 2023")
       expect(MiniI18n.l(date, locale: :zh)).to eq("2023年12月25日")
-      expect(MiniI18n.l(date, locale: :ja)).to eq("2023年12月25日")
+      expect(MiniI18n.l(date, locale: :ja)).to eq("2023年12月25日(月)")
     end
 
     it "formats short dates according to each locale" do
@@ -36,8 +36,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, format: :short, locale: :pt)).to eq("25/12/23")
       expect(MiniI18n.l(date, format: :short, locale: :it)).to eq("25/12/23")
       expect(MiniI18n.l(date, format: :short, locale: :nl)).to eq("25-12-23")
-      expect(MiniI18n.l(date, format: :short, locale: :zh)).to eq("23年12月25日")
-      expect(MiniI18n.l(date, format: :short, locale: :ja)).to eq("23年12月25日")
+      expect(MiniI18n.l(date, format: :short, locale: :zh)).to eq("12月25日")
+      expect(MiniI18n.l(date, format: :short, locale: :ja)).to eq("12/25")
     end
   end
 
@@ -50,6 +50,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(time, locale: :pt)).to eq("seg, 25 de dezembro de 2023 - 14:30")
       expect(MiniI18n.l(time, locale: :it)).to eq("lun 25 dicembre 2023 - 14:30")
       expect(MiniI18n.l(time, locale: :nl)).to eq("ma 25 december 2023 - 14:30")
+      expect(MiniI18n.l(time, locale: :zh)).to eq("2023年12月25日 星期一 14:30")
+      expect(MiniI18n.l(time, locale: :ja)).to eq("2023年12月25日(月) 14時30分")
     end
   end
 
