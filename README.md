@@ -99,7 +99,7 @@ The `t()` method can be also used as `translate()`:
 MiniI18n.translate(:hello)
 ```
 
-Or even using the global shortcut `T()`:
+Or you can even use the global shortcut `T()`:
 
 ```ruby
 T(:hello)
@@ -248,7 +248,7 @@ And then, you get:
 
 ### Localization
 
-You can also use the `MiniI18n.l()` (or the long version `MiniI18n.localize()` or the global shorcut `L()`) method to localize your dates, time and numbers.
+You can also use the `MiniI18n.l()` method (or the long version `MiniI18n.localize()` or the global shorcut `L()`) to localize your dates, time and numbers instances.
 
 `MiniI18n` provides built-in localization defaults for common languages:
 - `:en` - English
@@ -332,4 +332,4 @@ To contribute, just fork the repo, hack on it and send a pull request. Don't for
 
 ## License
 
-Copyright (c) Marc Anguera. MiniI18n is released under the [MIT](LICENSE) License.
+Copyright (c) Marc Anguera. `MiniI18n` is released under the [MIT](LICENSE) License.
