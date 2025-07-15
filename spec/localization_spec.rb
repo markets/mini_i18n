@@ -43,7 +43,7 @@ RSpec.describe MiniI18n::Localization do
     it 'as' do
       expect(MiniI18n.l(9000, as: :currency)).to eq '9,000 $'
       expect(MiniI18n.l(9000, as: :currency, locale: :es)).to eq '9.000 €'
-      expect(MiniI18n.l(125.5, as: :distance)).to eq 'Distance: 125.5 miles'
+      expect(MiniI18n.l(125.5, as: :distance)).to eq 'Distance -> 125.5 miles'
     end
   end
 end

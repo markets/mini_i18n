@@ -11,4 +11,4 @@ en:
   number:
     as:
       currency: '%{number} $'
-      distance: 'Distance: %{number} miles'
+      distance: 'Distance -> %{number} miles'
