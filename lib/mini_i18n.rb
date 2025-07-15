@@ -28,6 +28,16 @@ module MiniI18n
 
     def available_locales=(new_locales)
       @@available_locales = Array(new_locales).map(&:to_s)
+
+      # Load built-in localization defaults
+      @@available_locales.each do |locale|
+        default_locale_path = File.join(File.dirname(__FILE__), "mini_i18n", "locales", "#{locale}.yml")
+        if File.exist?(default_locale_path)
+          YAML.load_file(default_locale_path).each do |loc, translations|
+            add_translations(loc, translations)
+          end
+        end
+      end
     end
 
     def translations
