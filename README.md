@@ -103,7 +103,7 @@ Or even using the global shortcut `T()`:
 T(:hello)
 ```
 
-It accepts the following options:
+### Options
 
 * `locale`
 
@@ -303,7 +303,7 @@ en:
 => "1.000 €"
 ```
 
-**TIP** By using the `:as` option you can build custom full sentences with formatted numbers, like:
+**TIP** 💡 By using the `:as` option you can build custom full sentences with formatted numbers, like:
 
 ```yaml
 en:
