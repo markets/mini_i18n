@@ -72,54 +72,6 @@ MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
 ```
 
-### Automatic Loading of Default Locales
-
-MiniI18n provides built-in localization defaults for common languages. These defaults are automatically loaded when you set the `available_locales` configuration:
-
-```ruby
-# Built-in localization defaults are automatically loaded for available locales
-MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl, :zh, :ja]
-```
-
-
-
-```ruby
-# Set available locales (automatic loading happens here)
-MiniI18n.available_locales = [:en, :es, :fr, :zh, :ja]
-
-# Spanish date formatting
-MiniI18n.l(Date.new(2023, 12, 25), locale: :es)
-# => "25/12/2023"
-
-# French date formatting
-MiniI18n.l(Date.new(2023, 12, 25), locale: :fr)
-# => "lundi 25 décembre 2023"
-
-# Chinese date formatting
-MiniI18n.l(Date.new(2023, 12, 25), locale: :zh)
-# => "2023年12月25日"
-
-# Japanese date formatting
-MiniI18n.l(Date.new(2023, 12, 25), locale: :ja)
-# => "2023年12月25日"
-
-# Spanish number formatting
-MiniI18n.l(1234.56, locale: :es)
-# => "1.234,56"
-
-# French number formatting
-MiniI18n.l(1234.56, locale: :fr)
-# => "1 234,56"
-
-# Chinese number formatting
-MiniI18n.l(1234.56, locale: :zh)
-# => "1,234.56"
-
-# Japanese number formatting
-MiniI18n.l(1234.56, locale: :ja)
-# => "1,234.56"
-```
-
 Examples usage:
 
 ```ruby
@@ -296,7 +248,7 @@ And then, you get:
 
 You can also use the `MiniI18n.l()` (or the long version `MiniI18n.localize()` or the global shorcut `L()`) method to localize your dates, time and numbers.
 
-`MiniI18n` provides localization defaults for the following languages:
+`MiniI18n` provides built-in localization defaults for common languages:
 - `:en` - English
 - `:es` - Spanish
 - `:fr` - French
