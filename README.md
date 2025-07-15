@@ -4,7 +4,7 @@
 [![Build Status](https://github.com/markets/mini_i18n/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/markets/mini_i18n/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9d82e7151f8a5594da0f/maintainability)](https://codeclimate.com/github/markets/mini_i18n/maintainability)
 
-> Minimalistic I18n library for Ruby
+> Minimalistic i18n library for Ruby
 
 `MiniI18n` is a simple, flexible and fast Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
@@ -36,7 +36,7 @@ Or install it yourself as:
 
     > gem install mini_i18n
 
-## Usage
+## Configuration
 
 You should use the `configure` method to setup your environment:
 
@@ -72,7 +72,9 @@ MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
 ```
 
-Examples usage:
+## Usage
+
+Examples:
 
 ```ruby
 >> MiniI18n.t(:hello)
