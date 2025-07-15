@@ -1,6 +1,6 @@
+# Global shortcuts for MiniI18n convenience methods
+
 module Kernel
-  # Global shortcuts for MiniI18n convenience methods
-  
   def T(*args)
     MiniI18n.t(*args)
   end
