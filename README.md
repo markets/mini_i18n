@@ -4,7 +4,7 @@
 [![Build Status](https://github.com/markets/mini_i18n/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/markets/mini_i18n/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9d82e7151f8a5594da0f/maintainability)](https://codeclimate.com/github/markets/mini_i18n/maintainability)
 
-> Minimalistic I18n library for Ruby
+> Minimalistic i18n library for Ruby
 
 `MiniI18n` is a simple, flexible and fast Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
 
@@ -36,7 +36,7 @@ Or install it yourself as:
 
     > gem install mini_i18n
 
-## Usage
+## Configuration
 
 You should use the `configure` method to setup your environment:
 
@@ -72,7 +72,9 @@ MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
 ```
 
-Examples usage:
+## Usage
+
+Examples:
 
 ```ruby
 >> MiniI18n.t(:hello)
@@ -97,13 +99,13 @@ The `t()` method can be also used as `translate()`:
 MiniI18n.translate(:hello)
 ```
 
-Or even using the global shortcut `T()`:
+Or you can even use the global shortcut `T()`:
 
 ```ruby
 T(:hello)
 ```
 
-It accepts the following options:
+### Options
 
 * `locale`
 
@@ -246,7 +248,7 @@ And then, you get:
 
 ### Localization
 
-You can also use the `MiniI18n.l()` (or the long version `MiniI18n.localize()` or the global shorcut `L()`) method to localize your dates, time and numbers.
+You can also use the `MiniI18n.l()` method (or the long version `MiniI18n.localize()` or the global shorcut `L()`) to localize your dates, time and numbers instances.
 
 `MiniI18n` provides built-in localization defaults for common languages:
 - `:en` - English
@@ -303,7 +305,7 @@ en:
 => "1.000 €"
 ```
 
-**TIP** By using the `:as` option you can build custom full sentences with formatted numbers, like:
+**TIP** 💡 By using the `:as` option you can build custom full sentences with formatted numbers, like:
 
 ```yaml
 en:
@@ -330,4 +332,4 @@ To contribute, just fork the repo, hack on it and send a pull request. Don't for
 
 ## License
 
-Copyright (c) Marc Anguera. MiniI18n is released under the [MIT](LICENSE) License.
+Copyright (c) Marc Anguera. `MiniI18n` is released under the [MIT](LICENSE) License.

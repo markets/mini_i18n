@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0]
+
+- Add global shortcuts `T()` and `L()` convenience methods
+- Add built-in localization defaults for common languages
+
 ## [0.9.0]
 
 - Move from Travis CI to GitHub Actions
@@ -50,6 +55,7 @@ All notable changes to this project will be documented in this file.
 
 - First release :tada:
 
+[1.0.0]: https://github.com/markets/mini_i18n/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/markets/mini_i18n/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/markets/mini_i18n/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/markets/mini_i18n/compare/v0.6.0...v0.7.0
