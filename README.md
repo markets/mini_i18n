@@ -49,8 +49,7 @@ MiniI18n.configure do |config|
   config.default_locale = :pt
 
   # Available locales in your application.
-  # Built-in localization defaults for common languages are automatically loaded.
-  config.available_locales = [:en, :es, :fr, :pt, :zh, :ja]
+  config.available_locales = [:en, :es, :fr, :pt]
 
   # If given key is empty, defaults to the default_locale.
   config.fallbacks = true
@@ -82,17 +81,7 @@ MiniI18n provides built-in localization defaults for common languages. These def
 MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl, :zh, :ja]
 ```
 
-The following locales are available by default:
-- `:es` - Spanish
-- `:fr` - French
-- `:de` - German
-- `:pt` - Portuguese
-- `:it` - Italian
-- `:nl` - Dutch
-- `:zh` - Chinese
-- `:ja` - Japanese
 
-These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions:
 
 ```ruby
 # Set available locales (automatic loading happens here)
@@ -307,26 +296,37 @@ And then, you get:
 
 You can also use the `MiniI18n.l()` (or the long version `MiniI18n.localize()` or the global shorcut `L()`) method to localize your dates, time and numbers.
 
+`MiniI18n` provides localization defaults for the following languages:
+- `:en` - English
+- `:es` - Spanish
+- `:fr` - French
+- `:de` - German
+- `:pt` - Portuguese
+- `:it` - Italian
+- `:nl` - Dutch
+- `:zh` - Chinese
+- `:ja` - Japanese
+
+These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions. You can check a full example of all necessary and useful keys [in this folder](lib/mini_i18n/locales/).
+
 #### Dates and time
 
-It uses `strftime` under the hood. You should provide your localizations using the following format:
+It uses `strftime` under the hood. You can customize the defaults using the following format:
 
 ```yaml
 en:
   date:
     formats:
-      default: "%A %d, %B, %Y"
-      short: "%d %b %y"
+      default: "%A %d, %b %Y"
+      short: "%d %B, %y"
 ```
 
 ```ruby
 >> MiniI18n.l(Date.new(2018, 8, 15))
-=> "Wednesday 15, August, 2018"
+=> "Wednesday 15, Aug 2018"
 >> MiniI18n.l(Date.new(2018, 8, 15), format: :short)
-=> "15 Aug 18"
+=> "15 August, 18"
 ```
-
-You can check a full example of all necessary and useful keys [in this file](spec/fixtures/locales/localization.yml).
 
 #### Numbers
 
