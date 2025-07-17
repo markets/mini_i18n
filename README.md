@@ -6,7 +6,7 @@
 
 > Minimalistic i18n library for Ruby
 
-`MiniI18n` is a simple, flexible and fast Ruby Internationalization library. It supports localization, interpolations, pluralization, fallbacks, nested keys and more.
+`MiniI18n` is a simple, flexible, and fast Ruby Internationalization library. It supports localization, interpolation, pluralization, fallbacks, nested keys and more, with a minimal footprint and straightforward API (inspired by the well-known [I18n gem](https://github.com/ruby-i18n/i18n)).
 
 Translations should be stored in `YAML` or `JSON` files and they will be loaded in an in-memory `Hash`.
 
@@ -16,7 +16,7 @@ en:
 ```
 
 ```ruby
->> MiniI18n.t(:hello)
+>> T(:hello)
 => "Hello"
 ```
 
@@ -30,15 +30,15 @@ gem 'mini_i18n'
 
 And then execute:
 
-    > bundle install
+    bundle install
 
 Or install it yourself as:
 
-    > gem install mini_i18n
+    gem install mini_i18n
 
 ## Configuration
 
-You should use the `configure` method to setup your environment:
+Configure your environment using the `configure` method:
 
 ```ruby
 MiniI18n.configure do |config|
@@ -65,84 +65,74 @@ MiniI18n.configure do |config|
 end
 ```
 
-You can also use the following format:
+Alternatively, you can also use this format:
 
 ```ruby
 MiniI18n.load_translations(__dir__ + '/translations/*')
 MiniI18n.default_locale = :en
+MiniI18n.available_locales = [:en, :es, :fr, :pt]
 ```
 
 ## Usage
 
-Examples:
+**Quick examples:**
 
 ```ruby
->> MiniI18n.t(:hello)
+>> T(:hello)
 => "Hello"
->> MiniI18n.t(:hello, locale: :fr)
+>> T(:hello, locale: :fr)
 => "Bonjour"
->> MiniI18n.locale = :fr
-=> :fr
->> MiniI18n.t(:hello)
-=> "Bonjour"
->> MiniI18n.t(:non_existent_key)
-=> nil
->> MiniI18n.t([:hello, :bye])
-=> ["Hello", "Bye"]
->> MiniI18n.t('app.controllers.not_found')
-=> "Not found!"
-```
-
-The `t()` method can be also used as `translate()`:
-
-```ruby
-MiniI18n.translate(:hello)
-```
-
-Or you can even use the global shortcut `T()`:
-
-```ruby
-T(:hello)
-```
-
-### Options
-
-* `locale`
-
-```ruby
->> MiniI18n.t(:hello, locale: :es)
+>> MiniI18n.locale = :es
+>> T(:hello)
 => "Hola"
+>> T(:non_existent_key)
+=> nil
+>> T([:hello, :bye])
+=> ["Hello", "Bye"]
+>> T('application.validations.empty')
+=> "Can't be empty!"
 ```
 
-You can also get multiple locales at once by passing an array:
+### Methods
+
+- Use `T()` for translations.
+- Use `L()` for localization (dates, times, numbers). Read more details [in this section](#localization).
+
+You can also use the long form methods:
+- `MiniI18n.t(:hello)` or `MiniI18n.translate(:hello)`
+- `MiniI18n.l(Date.today)` or `MiniI18n.localize(Date.today)`
+
+### Options for translations
+
+**`locale`**
 
 ```ruby
->> MiniI18n.t(:hello, locale: [:en, :fr, :es])
+>> T(:hello, locale: :es)
+=> "Hola"
+>> T(:hello, locale: [:en, :fr, :es])
 => ["Hello", "Bonjour", "Hola"]
 ```
 
-* `scope`
+**`scope`**
 
 ```ruby
->> MiniI18n.t('application.views.welcome')
+>> T('application.views.welcome')
 => "Welcome"
->> MiniI18n.t('welcome', scope: 'application.views')
+>> T('welcome', scope: 'application.views')
 => "Welcome"
 ```
 
-Read more details about nested keys in [this section](#nested-keys).
-
-* `default`
+**`default`**
 
 ```ruby
->> MiniI18n.t(:non_existent_key, default: 'default value')
-=> "default value"
+>> T(:non_existent_key, default: 'this is a default value')
+=> "this is a default value"
 ```
 
-* `count`
+**`count`**
 
 ```ruby
->> MiniI18n.t('notifications', count: 0)
+>> T('notifications', count: 0)
 => "no unread notifications"
 ```
 
@@ -150,7 +140,7 @@ Read more details in the [Pluralization](#pluralization) section.
 
 ### Nested Keys
 
-You can use a custom separator when accessing nested keys (default separator is `.`):
+Use custom separators (default is `.`) to access nested keys.
 
 ```yaml
 en:
@@ -160,14 +150,12 @@ en:
 ```
 
 ```ruby
-MiniI18n.t('app.controllers.not_found')
+T('application.validations.empty')
 MiniI18n.separator = '/'
-MiniI18n.t('app/controllers/not_found')
+T('application/validations/empty')
 ```
 
 ### Interpolation
-
-You can also use variables in your translation definitions:
 
 ```yaml
 en:
@@ -175,13 +163,13 @@ en:
 ```
 
 ```ruby
->> MiniI18n.t(:hello_with_name, name: 'John Doe')
+>> T(:hello_with_name, name: 'John Doe')
 => "Hello John Doe!"
 ```
 
 ### Pluralization
 
-You should define your plurals in the following format (default pluralization rule accepts the keys: `zero`, `one` and `other`):
+Define plurals (default keys: `zero`, `one`, `other`):
 
 ```yaml
 en:
@@ -191,20 +179,18 @@ en:
     other: '%{count} unread notifications'
 ```
 
-Then, you should call the method with the `count` option:
-
 ```ruby
->> MiniI18n.t('notifications', count: 0)
+>> T('notifications', count: 0)
 => "good job! no new notifications"
->> MiniI18n.t('notifications', count: 1)
+>> T('notifications', count: 1)
 => "1 unread notification"
->> MiniI18n.t('notifications', count: 5)
+>> T('notifications', count: 5)
 => "5 unread notifications"
 ```
 
 #### Custom pluralization rules
 
-You are also able to customize how plurals are handled, by locale, defining custom pluralization rules. Example:
+You are also able to customize how plurals are handled, in each locale, by defining custom pluralization rules. Example:
 
 ```ruby
 MiniI18n.pluralization_rules = {
@@ -222,7 +208,7 @@ MiniI18n.pluralization_rules = {
 }
 ```
 
-Now, in your translation files, you should define content for those keys:
+Then, define those keys in your translation files:
 
 ```yaml
 es:
@@ -233,24 +219,22 @@ es:
     other: 'alerta!! %{count} notificaciones!'
 ```
 
-And then, you get:
-
 ```ruby
->> MiniI18n.t('notifications', count: 0)
+>> T('notifications', count: 0)
 => "no tienes nuevas notificaciones"
->> MiniI18n.t('notifications', count: 2)
+>> T('notifications', count: 2)
 => "tienes algunas notificaciones pendientes ..."
->> MiniI18n.t('notifications', count: 5)
+>> T('notifications', count: 5)
 => "tienes 5 notificaciones!"
->> MiniI18n.t('notifications', count: 20)
+>> T('notifications', count: 20)
 => "alerta!! 20 notificaciones!"
 ```
 
 ### Localization
 
-You can also use the `MiniI18n.l()` method (or the long version `MiniI18n.localize()` or the global shorcut `L()`) to localize your dates, time and numbers instances.
+Use `L()` to localize dates, times, and numbers. Don't forget you can also use `MiniI18n.l()` or `MiniI18n.localize()`.
 
-`MiniI18n` provides built-in localization defaults for common languages:
+`MiniI18n` provides built-in localization defaults for some languages:
 - `:en` - English
 - `:es` - Spanish
 - `:fr` - French
@@ -276,9 +260,9 @@ en:
 ```
 
 ```ruby
->> MiniI18n.l(Date.new(2018, 8, 15))
+>> L(Date.new(2018, 8, 15))
 => "Wednesday 15, Aug 2018"
->> MiniI18n.l(Date.new(2018, 8, 15), format: :short)
+>> L(Date.new(2018, 8, 15), format: :short)
 => "15 August, 18"
 ```
 
@@ -297,11 +281,11 @@ en:
 ```
 
 ```ruby
->> MiniI18n.l(1000.25)
+>> L(1000.25)
 => "1,000.25"
->> MiniI18n.l(1000, as: :currency)
+>> L(1000, as: :currency)
 => "1,000 $"
->> MiniI18n.l(1000, as: :currency, locale: :es)
+>> L(1000, as: :currency, locale: :es)
 => "1.000 €"
 ```
 
@@ -316,19 +300,19 @@ en:
 ```
 
 ```ruby
->> MiniI18n.l(1000, as: :final_price)
+>> L(1000, as: :final_price)
 => "Final price: 1,000 $"
->> MiniI18n.l(70.5, as: :percentage)
+>> L(70.5, as: :percentage)
 => "70.5%"
 ```
 
 ## Development
 
-Any kind of feedback, bug report, idea or enhancement are much appreciated.
+Feedback, bug reports, ideas, and enhancements are welcome!
 
-To contribute, just fork the repo, hack on it and send a pull request. Don't forget to add specs for behaviour changes and run the test suite:
+To contribute, fork the repo, make your changes, and open a pull request. Please add specs for any behavior changes and run the test suite:
 
-    > bundle exec rspec
+    bundle exec rspec
 
 ## License
 
