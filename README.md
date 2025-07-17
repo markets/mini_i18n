@@ -65,14 +65,6 @@ MiniI18n.configure do |config|
 end
 ```
 
-Alternatively, you can also use this format:
-
-```ruby
-MiniI18n.load_translations(__dir__ + '/translations/*')
-MiniI18n.default_locale = :en
-MiniI18n.available_locales = [:en, :es, :fr, :pt]
-```
-
 ## Usage
 
 **Quick examples:**
@@ -144,9 +136,9 @@ Use custom separators (default is `.`) to access nested keys.
 
 ```yaml
 en:
-  app:
-    controllers:
-      not_found: "Not found!"
+  application:
+    validations:
+      empty: "Can't be empty!"
 ```
 
 ```ruby
@@ -190,7 +182,7 @@ en:
 
 #### Custom pluralization rules
 
-You are also able to customize how plurals are handled, in each locale, by defining custom pluralization rules. Example:
+You are also able to customize how plurals are handled in each locale, by defining custom pluralization rules. Example:
 
 ```ruby
 MiniI18n.pluralization_rules = {
@@ -234,7 +226,7 @@ es:
 
 Use `L()` to localize dates, times, and numbers. Don't forget you can also use `MiniI18n.l()` or `MiniI18n.localize()`.
 
-`MiniI18n` provides built-in localization defaults for some languages:
+The gem provides built-in localization for some languages:
 - `:en` - English
 - `:es` - Spanish
 - `:fr` - French
@@ -245,7 +237,7 @@ Use `L()` to localize dates, times, and numbers. Don't forget you can also use `
 - `:zh` - Chinese
 - `:ja` - Japanese
 
-These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions. You can check a full example of all necessary and useful keys [in this folder](lib/mini_i18n/locales/).
+These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions. You can check out a full example of all supported keys [in this folder](lib/mini_i18n/locales/).
 
 #### Dates and time
 
