@@ -13,11 +13,15 @@ Translations should be stored in `YAML` or `JSON` files and they will be loaded 
 ```yaml
 en:
   hello: 'Hello'
+es:
+  hello: 'Hola'
 ```
 
 ```ruby
 >> T(:hello)
 => "Hello"
+>> T(:hello, locale: :es)
+=> "Hola"
 ```
 
 ## Installation
@@ -67,7 +71,7 @@ end
 
 ## Usage
 
-**Quick examples:**
+### Quick examples
 
 ```ruby
 >> T(:hello)
@@ -81,20 +85,24 @@ end
 => nil
 >> T([:hello, :bye])
 => ["Hello", "Bye"]
->> T('application.validations.empty')
+>> T('validations.empty')
 => "Can't be empty!"
+>> L(Date.new(2025, 8, 16), format: :short)
+=> "16 Aug, 18"
+>> L(1000.25)
+=> "1,000.25"
 ```
 
-### Methods
+### Helpers
 
 - Use `T()` for translations.
 - Use `L()` for localization (dates, times, numbers). Read more details [in this section](#localization).
 
 You can also use the long form methods:
-- `MiniI18n.t(:hello)` or `MiniI18n.translate(:hello)`
-- `MiniI18n.l(Date.today)` or `MiniI18n.localize(Date.today)`
+- `MiniI18n.t()` or `MiniI18n.translate()`
+- `MiniI18n.l()` or `MiniI18n.localize()`
 
-### Options for translations
+### Options for translation helper
 
 **`locale`**
 
@@ -108,9 +116,9 @@ You can also use the long form methods:
 **`scope`**
 
 ```ruby
->> T('application.views.welcome')
+>> T('views.welcome')
 => "Welcome"
->> T('welcome', scope: 'application.views')
+>> T('welcome', scope: 'views')
 => "Welcome"
 ```
 
@@ -136,15 +144,14 @@ Use custom separators (default is `.`) to access nested keys.
 
 ```yaml
 en:
-  application:
-    validations:
-      empty: "Can't be empty!"
+  validations:
+    empty: "Can't be empty!"
 ```
 
 ```ruby
-T('application.validations.empty')
+T('validations.empty')
 MiniI18n.separator = '/'
-T('application/validations/empty')
+T('validations/empty')
 ```
 
 ### Interpolation
