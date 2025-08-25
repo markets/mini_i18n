@@ -9,7 +9,7 @@ module MiniI18n
     end
 
     def deep_merge(merge_to, merge_from)
-      merged = merge_to.dup  # dup is faster than clone for simple hashes
+      merged = merge_to.dup
 
       merge_from.each do |key, value|
         string_key = key.to_s
