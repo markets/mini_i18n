@@ -89,10 +89,12 @@ module MiniI18n
       _locale = available_locale?(options[:locale]) || locale
       scope = options[:scope]
 
+      # Optimize key parsing - avoid multiple array operations
       keys = [_locale.to_s]
-      keys << scope.to_s.split(separator) if scope
-      keys << key.to_s.split(separator)
-      keys = keys.flatten
+      if scope
+        keys.concat(scope.to_s.split(separator))
+      end
+      keys.concat(key.to_s.split(separator))
 
       result = lookup(*keys)
 
@@ -155,7 +157,8 @@ module MiniI18n
     end
 
     def with_interpolation(result, options)
-      if result.respond_to?(:match) && result.match(/%{\w+}/)
+      # Optimize interpolation detection - use include? for faster check
+      if result.is_a?(String) && result.include?('%{')
         result = Utils.interpolate(result, options)
       end
 

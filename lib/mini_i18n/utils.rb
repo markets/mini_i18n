@@ -9,15 +9,15 @@ module MiniI18n
     end
 
     def deep_merge(merge_to, merge_from)
-      merged = merge_to.clone
+      merged = merge_to.dup  # dup is faster than clone for simple hashes
 
       merge_from.each do |key, value|
-        key = key.to_s
+        string_key = key.to_s
 
-        if value.is_a?(Hash) && merged[key].is_a?(Hash)
-          merged[key] = deep_merge(merged[key], value)
+        if value.is_a?(Hash) && merged[string_key].is_a?(Hash)
+          merged[string_key] = deep_merge(merged[string_key], value)
         else
-          merged[key] = value
+          merged[string_key] = value
         end
       end
 
