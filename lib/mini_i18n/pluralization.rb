@@ -8,7 +8,8 @@ module MiniI18n
     private
 
     def self.default_rule
-      -> (n) {
+      # Memoize the default rule to avoid creating lambda on every call
+      @default_rule ||= -> (n) {
         case n
         when 0
           'zero'

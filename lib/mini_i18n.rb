@@ -119,8 +119,8 @@ module MiniI18n
     end
 
     def available_locale?(new_locale)
-      new_locale = new_locale.to_s
-      available_locales.include?(new_locale) && new_locale
+      locale_string = new_locale.to_s
+      available_locales.include?(locale_string) && locale_string
     end
 
     def lookup(*keys)
