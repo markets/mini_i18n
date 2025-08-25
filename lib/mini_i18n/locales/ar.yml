@@ -1,0 +1,17 @@
+ar:
+  date:
+    formats:
+      default: "%A %-d %B %Y"
+      short: "%d/%m/%y"
+    day_names: [الأحد, الاثنين, الثلاثاء, الأربعاء, الخميس, الجمعة, السبت]
+    abbr_day_names: [أحد, اثن, ثلا, أرب, خمي, جمع, سبت]
+    month_names: [يناير, فبراير, مارس, أبريل, مايو, يونيو, يوليو, أغسطس, سبتمبر, أكتوبر, نوفمبر, ديسمبر]
+    abbr_month_names: [ينا, فبر, مار, أبر, ماي, يون, يول, أغس, سبت, أكت, نوف, ديس]
+  time:
+    formats:
+      default: "%a %-d %B %Y - %H:%M"
+      short: "%d/%m/%y - %H:%M"
+  number:
+    format:
+      delimiter: ','
+      separator: '.'
