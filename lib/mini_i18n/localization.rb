@@ -8,6 +8,9 @@ module MiniI18n
     DAYS_MONTHS_REGEX = /%[aAbB]/
 
     def localize(object, options = {})
+      return multiple_localize(object, options) if object.is_a?(Array)
+      return multiple_locales_localize(object, options) if options[:locale].is_a?(Array)
+
       case object
       when Numeric
         localize_number(object, options)
@@ -69,6 +72,18 @@ module MiniI18n
       end
 
       object && localize(object, options)
+    end
+
+    def multiple_localize(objects, options)
+      objects.map do |obj|
+        localize(obj, options)
+      end
+    end
+
+    def multiple_locales_localize(object, options)
+      options[:locale].map do |_locale|
+        localize(object, options.merge(locale: _locale))
+      end
     end
   end
 end
