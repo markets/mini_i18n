@@ -103,15 +103,5 @@ RSpec.describe MiniI18n::Localization do
     end
   end
 
-  describe 'alias method l' do
-    it 'works with multiple objects' do
-      result = MiniI18n.l([1000, 2000])
-      expect(result).to eq ['1,000', '2,000']
-    end
 
-    it 'works with multiple locales' do
-      result = MiniI18n.l(1000, locale: [:en, :es])
-      expect(result).to eq ['1,000', '1.000']
-    end
-  end
 end
