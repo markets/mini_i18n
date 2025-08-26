@@ -8,7 +8,7 @@ module MiniI18n
     private
 
     def self.default_rule
-      -> (n) {
+      @default_rule ||= -> (n) {
         case n
         when 0
           'zero'

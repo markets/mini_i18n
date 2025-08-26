@@ -90,9 +90,8 @@ module MiniI18n
       scope = options[:scope]
 
       keys = [_locale.to_s]
-      keys << scope.to_s.split(separator) if scope
-      keys << key.to_s.split(separator)
-      keys = keys.flatten
+      keys.concat(scope.to_s.split(separator)) if scope
+      keys.concat(key.to_s.split(separator))
 
       result = lookup(*keys)
 
@@ -117,8 +116,8 @@ module MiniI18n
     end
 
     def available_locale?(new_locale)
-      new_locale = new_locale.to_s
-      available_locales.include?(new_locale) && new_locale
+      locale_string = new_locale.to_s
+      available_locales.include?(locale_string) && locale_string
     end
 
     def lookup(*keys)
@@ -155,7 +154,7 @@ module MiniI18n
     end
 
     def with_interpolation(result, options)
-      if result.respond_to?(:match) && result.match(/%{\w+}/)
+      if result.is_a?(String) && result.include?('%{')
         result = Utils.interpolate(result, options)
       end
 
