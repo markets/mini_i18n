@@ -243,6 +243,8 @@ The gem provides built-in localization for some languages:
 - `:nl` - Dutch
 - `:zh` - Chinese
 - `:ja` - Japanese
+- `:ru` - Russian
+- `:ar` - Arabic
 
 These defaults include proper date/time formats, day and month names, and number formatting that follows each language's conventions. You can check out a full example of all supported keys [in this folder](lib/mini_i18n/locales/).
 

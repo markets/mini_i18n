@@ -6,7 +6,7 @@ RSpec.describe "Default Locales Integration" do
   before(:each) do
     @original_translations = MiniI18n.translations.dup
     @original_available_locales = MiniI18n.available_locales.dup
-    MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl, :zh, :ja]
+    MiniI18n.available_locales = [:en, :es, :fr, :de, :pt, :it, :nl, :zh, :ja, :ru, :ar]
   end
 
   after(:each) do
@@ -26,6 +26,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, locale: :nl)).to eq("maandag 25 december 2023")
       expect(MiniI18n.l(date, locale: :zh)).to eq("2023年12月25日")
       expect(MiniI18n.l(date, locale: :ja)).to eq("2023年12月25日(月)")
+      expect(MiniI18n.l(date, locale: :ru)).to eq("понедельник, 25 декабрь 2023 г.")
+      expect(MiniI18n.l(date, locale: :ar)).to eq("الاثنين 25 ديسمبر 2023")
     end
 
     it "formats short dates according to each locale" do
@@ -38,6 +40,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(date, format: :short, locale: :nl)).to eq("25-12-23")
       expect(MiniI18n.l(date, format: :short, locale: :zh)).to eq("12月25日")
       expect(MiniI18n.l(date, format: :short, locale: :ja)).to eq("12/25")
+      expect(MiniI18n.l(date, format: :short, locale: :ru)).to eq("25.12.23")
+      expect(MiniI18n.l(date, format: :short, locale: :ar)).to eq("25/12/23")
     end
   end
 
@@ -52,6 +56,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(time, locale: :nl)).to eq("ma 25 december 2023 - 14:30")
       expect(MiniI18n.l(time, locale: :zh)).to eq("2023年12月25日 星期一 14:30")
       expect(MiniI18n.l(time, locale: :ja)).to eq("2023年12月25日(月) 14時30分")
+      expect(MiniI18n.l(time, locale: :ru)).to eq("пн, 25 декабрь 2023 г. - 14:30")
+      expect(MiniI18n.l(time, locale: :ar)).to eq("اثن 25 ديسمبر 2023 - 14:30")
     end
   end
 
@@ -66,6 +72,8 @@ RSpec.describe "Default Locales Integration" do
       expect(MiniI18n.l(number, locale: :nl)).to eq("1.234,56")
       expect(MiniI18n.l(number, locale: :zh)).to eq("1,234.56")
       expect(MiniI18n.l(number, locale: :ja)).to eq("1,234.56")
+      expect(MiniI18n.l(number, locale: :ru)).to eq("1 234,56")
+      expect(MiniI18n.l(number, locale: :ar)).to eq("1,234.56")
     end
   end
 end
