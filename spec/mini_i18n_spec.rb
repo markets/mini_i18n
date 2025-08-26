@@ -76,6 +76,11 @@ RSpec.describe MiniI18n do
       expect(MiniI18n.t(:hello_interpolation, name: 'world', locale: [:en])).to eq ['hello world']
     end
 
+    it "all locales with '*'" do
+      expect(MiniI18n.t(:hello, locale: '*')).to eq ['hello', 'hola', 'bonjour']
+      expect(MiniI18n.t(:hello_interpolation, name: 'world', locale: '*')).to eq ['hello world', 'hola world', 'bonjour world']
+    end
+
     it "scope" do
       expect(MiniI18n.t('hello', scope: :second_level)).to eq 'hello 2'
     end

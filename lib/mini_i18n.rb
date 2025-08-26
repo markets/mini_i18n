@@ -84,6 +84,8 @@ module MiniI18n
       return if key.empty? || translations.empty?
 
       return multiple_translate(key, options) if key.is_a?(Array)
+      
+      options = expand_all_locales(options)
       return multiple_locales(key, options) if options[:locale].is_a?(Array)
 
       _locale = available_locale?(options[:locale]) || locale
@@ -170,6 +172,14 @@ module MiniI18n
     def multiple_locales(key, options)
       options[:locale].map do |_locale|
         t(key, options.merge(locale: _locale))
+      end
+    end
+
+    def expand_all_locales(options)
+      if options[:locale] == '*'
+        options.merge(locale: available_locales)
+      else
+        options
       end
     end
   end

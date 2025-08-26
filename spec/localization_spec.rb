@@ -103,5 +103,24 @@ RSpec.describe MiniI18n::Localization do
     end
   end
 
+  describe 'all locales with *' do
+    let(:number) { 1234.56 }
+
+    before do
+      # Ensure built-in locale data is loaded for proper formatting
+      MiniI18n.available_locales = [:en, :es, :fr]
+    end
+
+    it 'localizes number for all locales' do
+      result = MiniI18n.l(number, locale: '*')
+      expect(result).to eq ['1,234.56', '1.234,56', '1 234,56']
+    end
+
+    it 'localizes with currency for all locales' do
+      result = MiniI18n.l(1000, as: :currency, locale: '*')
+      expect(result).to eq ['1,000 $', '1.000 €', nil]
+    end
+  end
+
 
 end
