@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0]
+
+- Add more languages support for localization: Russian (ru) and Arabic (ar)
+- Add multiple objects and multiple locales support to localize method
+- Performance optimizations
+- Add support for `locale: '*'` to use all available locales
+
 ## [1.0.0]
 
 - Add global shortcuts `T()` and `L()` convenience methods
@@ -55,6 +62,7 @@ All notable changes to this project will be documented in this file.
 
 - First release :tada:
 
+[1.1.0]: https://github.com/markets/mini_i18n/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/markets/mini_i18n/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/markets/mini_i18n/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/markets/mini_i18n/compare/v0.7.0...v0.8.0
