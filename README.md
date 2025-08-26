@@ -109,10 +109,10 @@ You can also use the long form methods:
 ```ruby
 >> T(:hello, locale: :es)
 => "Hola"
->> T(:hello, locale: [:en, :fr, :es])
-=> ["Hello", "Bonjour", "Hola"]
->> T(:hello, locale: '*')
-=> ["Hello", "Hola", "Bonjour"]  # Uses all available locales
+>> T(:hello, locale: [:en, :es])
+=> ["Hello", "Hola"]
+>> T(:hello, locale: '*') # Uses all available locales
+=> ["Hello", "Hola", "Bonjour"]
 ```
 
 **`scope`**
@@ -351,25 +351,12 @@ date = Date.new(2023, 8, 15)
 => ["Tuesday 15, August, 2023", "martes 15, agosto, 2023", "Dienstag 15, August, 2023"]
 
 # Currency formatting across locales
->> L(999.99, as: :currency, locale: [:en, :es, :de])
-=> ["999.99 $", "999,99 €", "999,99 €"]
+>> L(999.99, as: :currency, locale: [:en, :es])
+=> ["999.99 $", "999,99 €"]
 
 # Currency formatting for all available locales
 >> L(1000, as: :currency, locale: '*')
-=> ["1,000 $", "1.000 €", nil]  # nil when locale doesn't have currency format
-```
-
-**Combining multiple objects and locales**
-
-```ruby
-# Multiple numbers with multiple locales
->> L([1000, 2000], locale: [:en, :es])
-=> [["1,000", "2,000"], ["1.000", "2.000"]]
-
-# Multiple dates with multiple locales and format
-dates = [Date.new(2023, 1, 1), Date.new(2023, 12, 31)]
->> L(dates, locale: [:en, :fr], format: :short)
-=> [["01 Jan, 23", "31 Dec, 23"], ["01 janv., 23", "31 déc., 23"]]
+=> ["1,000 $", "1.000 €", "1.000 €"]
 ```
 
 ## Development

@@ -121,6 +121,4 @@ RSpec.describe MiniI18n::Localization do
       expect(result).to eq ['1,000 $', '1.000 €', nil]
     end
   end
-
-
 end
