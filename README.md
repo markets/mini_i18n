@@ -111,6 +111,8 @@ You can also use the long form methods:
 => "Hola"
 >> T(:hello, locale: [:en, :fr, :es])
 => ["Hello", "Bonjour", "Hola"]
+>> T(:hello, locale: '*')
+=> ["Hello", "Hola", "Bonjour"]  # Uses all available locales
 ```
 
 **`scope`**
@@ -339,6 +341,10 @@ dates = [Date.new(2023, 12, 25), Date.new(2024, 1, 1)]
 >> L(1234.56, locale: [:en, :es, :fr])
 => ["1,234.56", "1.234,56", "1 234,56"]
 
+# Use '*' to automatically include all available locales
+>> L(1234.56, locale: '*')
+=> ["1,234.56", "1.234,56", "1 234,56"]
+
 # Localize date across different locales
 date = Date.new(2023, 8, 15)
 >> L(date, locale: [:en, :es, :de])
@@ -347,6 +353,10 @@ date = Date.new(2023, 8, 15)
 # Currency formatting across locales
 >> L(999.99, as: :currency, locale: [:en, :es, :de])
 => ["999.99 $", "999,99 €", "999,99 €"]
+
+# Currency formatting for all available locales
+>> L(1000, as: :currency, locale: '*')
+=> ["1,000 $", "1.000 €", nil]  # nil when locale doesn't have currency format
 ```
 
 **Combining multiple objects and locales**

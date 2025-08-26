@@ -9,6 +9,8 @@ module MiniI18n
 
     def localize(object, options = {})
       return multiple_localize(object, options) if object.is_a?(Array)
+      
+      options = expand_all_locales(options)
       return multiple_locales_localize(object, options) if options[:locale].is_a?(Array)
 
       case object
