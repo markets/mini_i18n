@@ -91,10 +91,6 @@ end
 => "16 Aug, 18"
 >> L(1000.25)
 => "1,000.25"
->> L([1000, 2000])
-=> ["1,000", "2,000"]
->> L(1000, locale: [:en, :es])
-=> ["1,000", "1.000"]
 ```
 
 ### Helpers
@@ -307,6 +303,61 @@ en:
 => "Final price: 1,000 $"
 >> L(70.5, as: :percentage)
 => "70.5%"
+```
+
+#### Multiple objects and multiple locales
+
+The `localize` method supports batch operations with multiple objects and multiple locales, similar to the `translate` method.
+
+**Multiple objects**
+
+```ruby
+# Multiple dates
+dates = [Date.new(2023, 12, 25), Date.new(2024, 1, 1)]
+>> L(dates)
+=> ["Monday 25, December, 2023", "Monday 01, January, 2024"]
+
+# Multiple numbers
+>> L([1000, 2500.75, 999.99])
+=> ["1,000", "2,500.75", "999.99"]
+
+# Mixed objects with formatting options
+>> L([1000, 2000], as: :currency)
+=> ["1,000 $", "2,000 $"]
+
+# Multiple dates with custom format
+>> L([Date.new(2023, 6, 15), Date.new(2023, 12, 31)], format: :short)
+=> ["15 Jun, 23", "31 Dec, 23"]
+```
+
+**Multiple locales**
+
+```ruby
+# Localize number across different locales
+>> L(1234.56, locale: [:en, :es, :fr])
+=> ["1,234.56", "1.234,56", "1 234,56"]
+
+# Localize date across different locales
+date = Date.new(2023, 8, 15)
+>> L(date, locale: [:en, :es, :de])
+=> ["Tuesday 15, August, 2023", "martes 15, agosto, 2023", "Dienstag 15, August, 2023"]
+
+# Currency formatting across locales
+>> L(999.99, as: :currency, locale: [:en, :es, :de])
+=> ["999.99 $", "999,99 €", "999,99 €"]
+```
+
+**Combining multiple objects and locales**
+
+```ruby
+# Multiple numbers with multiple locales
+>> L([1000, 2000], locale: [:en, :es])
+=> [["1,000", "2,000"], ["1.000", "2.000"]]
+
+# Multiple dates with multiple locales and format
+dates = [Date.new(2023, 1, 1), Date.new(2023, 12, 31)]
+>> L(dates, locale: [:en, :fr], format: :short)
+=> [["01 Jan, 23", "31 Dec, 23"], ["01 janv., 23", "31 déc., 23"]]
 ```
 
 ## Development
