@@ -10,7 +10,7 @@ module MiniI18n
     def localize(object, options = {})
       return multiple_localize(object, options) if object.is_a?(Array)
       
-      options = expand_all_locales_localize(options)
+      options = expand_all_locales(options)
       return multiple_locales_localize(object, options) if options[:locale].is_a?(Array)
 
       case object
@@ -85,14 +85,6 @@ module MiniI18n
     def multiple_locales_localize(object, options)
       options[:locale].map do |_locale|
         localize(object, options.merge(locale: _locale))
-      end
-    end
-
-    def expand_all_locales_localize(options)
-      if options[:locale] == '*'
-        options.merge(locale: MiniI18n.available_locales)
-      else
-        options
       end
     end
   end
