@@ -89,7 +89,7 @@ module MiniI18n
       options = parse_export_options
       output_file = options[:file] || 'translations.csv'
       
-      # Always use single-file export with file path mapping
+      # Use single-file export with clean keys (no file path mapping)
       translation_files = find_translation_files
       if translation_files.empty?
         puts "Error: No translation files found"
@@ -98,7 +98,7 @@ module MiniI18n
       
       export_all_to_single_csv(translation_files, output_file)
       puts "Translations exported successfully to #{output_file}"
-      puts "File contains #{translation_files.count} source files with file path mapping"
+      puts "File contains all translations from #{translation_files.count} source files"
     end
 
     def version_command
@@ -123,10 +123,10 @@ module MiniI18n
           3. Run 'mi18n import' to update original YAML files with translated content
 
         Key Features:
-          - Single CSV file contains all translations with file path mapping
-          - Keys are formatted as 'translation.key__path/to/file.yml' for easy identification
-          - Import automatically restores translations to their original YAML files
+          - Single CSV file contains all translations with clean, readable keys
+          - Import automatically finds and updates the correct YAML files
           - Preserves original file structure and organization
+          - No complex key mapping - translators work with clean translation keys
 
         Examples:
           mi18n stats
@@ -419,42 +419,49 @@ module MiniI18n
     end
 
     def export_all_to_single_csv(translation_files, output_file)
-      # Collect all keys with their source file paths
-      all_key_file_pairs = []
+      # Collect all unique keys across all files
+      all_keys = Set.new
       all_locales = Set.new
+      file_contents = {}
       
       translation_files.each do |yaml_file|
         yaml_content = YAML.load_file(yaml_file)
+        file_contents[yaml_file] = yaml_content
         
         # Add all locales from this file
         yaml_content.keys.each { |locale| all_locales << locale }
         
-        # Collect keys with file path mapping
+        # Collect all unique keys from this file
         yaml_content.each do |locale, translations|
           collect_keys_recursive(translations).each do |key|
-            # Create mapped key: original_key__file_path
-            mapped_key = "#{key}__#{yaml_file}"
-            all_key_file_pairs << [mapped_key, key, yaml_file, yaml_content]
+            all_keys << key
           end
         end
       end
       
-      # Remove duplicates and sort
-      all_key_file_pairs = all_key_file_pairs.uniq { |item| item[0] }.sort_by { |item| item[0] }
+      # Sort keys and locales for consistent output
+      sorted_keys = all_keys.to_a.sort
       locales = all_locales.to_a.sort
       
-      # Write CSV
+      # Write CSV with clean keys (no file path mapping)
       CSV.open(output_file, 'w') do |csv|
         csv << ['key'] + locales
         
-        all_key_file_pairs.each do |mapped_key, original_key, yaml_file, yaml_content|
-          row = [mapped_key]
+        sorted_keys.each do |key|
+          row = [key]
           
           locales.each do |locale|
-            if yaml_content.key?(locale)
-              value = get_nested_value(yaml_content[locale], original_key) || ''
-            else
-              value = ''
+            # Find the value for this key in any file that contains this locale
+            value = ''
+            translation_files.each do |yaml_file|
+              yaml_content = file_contents[yaml_file]
+              if yaml_content.key?(locale)
+                found_value = get_nested_value(yaml_content[locale], key)
+                if found_value && !found_value.to_s.strip.empty?
+                  value = found_value
+                  break  # Use the first non-empty value found
+                end
+              end
             end
             row << value
           end
@@ -465,78 +472,98 @@ module MiniI18n
     end
 
     def import_from_single_csv_with_mapping(csv_file)
-      # Group translations by source file, but only include keys that originally belonged to that file
-      translations_by_file = {}
+      # Load all existing YAML files to understand their structure
+      translation_files = find_translation_files
+      if translation_files.empty?
+        puts "Error: No translation files found to update"
+        return
+      end
+      
+      # Load content of all files
+      file_contents = {}
+      translation_files.each do |yaml_file|
+        file_contents[yaml_file] = File.exist?(yaml_file) ? YAML.load_file(yaml_file) : {}
+      end
+      
+      # Process CSV and update files
+      updated_files = Set.new
       
       CSV.foreach(csv_file, headers: true) do |row|
-        mapped_key = row['key']
-        next if mapped_key.nil? || mapped_key.strip.empty?
+        key = row['key']
+        next if key.nil? || key.strip.empty?
         
-        # Parse the mapped key to extract original key and file path
-        if mapped_key.include?('__')
-          original_key, file_path = mapped_key.split('__', 2)
-        else
-          # Fallback for keys without file mapping (backward compatibility)
-          original_key = mapped_key
-          file_path = nil
-        end
-        
-        # Skip if we can't determine the file path
-        next if file_path.nil?
-        
-        # Initialize file structure if needed
-        translations_by_file[file_path] ||= {}
-        
-        # Load the original file to determine which locales it contained
-        if File.exist?(file_path)
-          original_content = YAML.load_file(file_path)
-          original_locales = original_content.keys
-        else
-          # If file doesn't exist, we'll take all locales from CSV
-          original_locales = row.headers.reject { |h| h == 'key' }
-        end
-        
-        # Process each locale column, but only for locales that were in the original file
+        # Process each locale column
         row.headers.each do |header|
           next if header == 'key'
           
           locale = header.to_s
           value = row[header]
           
-          # Skip this locale if it wasn't in the original file
-          next unless original_locales.include?(locale)
-          
           # Skip nil values, but allow empty strings
           next if value.nil?
           
-          translations_by_file[file_path][locale] ||= {}
-          set_nested_key(translations_by_file[file_path][locale], original_key, value)
+          # Find which files should contain this key for this locale
+          files_to_update = find_files_containing_key(key, locale, file_contents)
+          
+          # If no files contain this key+locale combination, try to find a suitable file
+          if files_to_update.empty?
+            files_to_update = find_suitable_files_for_locale(locale, file_contents)
+          end
+          
+          # Update the key in all relevant files
+          files_to_update.each do |yaml_file|
+            file_contents[yaml_file][locale] ||= {}
+            set_nested_key(file_contents[yaml_file][locale], key, value)
+            updated_files << yaml_file
+          end
         end
       end
       
-      # Update each source file
-      updated_files = []
-      translations_by_file.each do |file_path, locale_data|
-        # Load existing YAML content or create new
-        yaml_content = File.exist?(file_path) ? YAML.load_file(file_path) : {}
-        
-        # Merge new translations
-        locale_data.each do |locale, translations|
-          yaml_content[locale] ||= {}
-          merge_translations(yaml_content[locale], translations)
-        end
-        
-        # Write back to file
-        File.write(file_path, yaml_content.to_yaml)
-        updated_files << file_path
+      # Write back all updated files
+      updated_files.each do |file_path|
+        File.write(file_path, file_contents[file_path].to_yaml)
       end
       
       if updated_files.any?
         puts "Updated #{updated_files.count} translation files:"
         updated_files.each { |file| puts "  #{file}" }
       else
-        puts "No files were updated (no valid file mappings found in CSV)"
+        puts "No files were updated"
       end
+    end
+    
+    def find_files_containing_key(key, locale, file_contents)
+      matching_files = []
+      
+      file_contents.each do |file_path, yaml_content|
+        if yaml_content.key?(locale)
+          # Check if this file contains the key (even if the value is empty)
+          existing_value = get_nested_value(yaml_content[locale], key)
+          if !existing_value.nil?
+            matching_files << file_path
+          end
+        end
+      end
+      
+      matching_files
+    end
+    
+    def find_suitable_files_for_locale(locale, file_contents)
+      # Find files that contain this locale
+      suitable_files = []
+      
+      file_contents.each do |file_path, yaml_content|
+        if yaml_content.key?(locale)
+          suitable_files << file_path
+        end
+      end
+      
+      # If no files contain this locale, use the first file (or create structure)
+      if suitable_files.empty? && !file_contents.empty?
+        suitable_files = [file_contents.keys.first]
+      end
+      
+      suitable_files
     end
 
     def merge_translations(target, source)

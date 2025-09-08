@@ -121,25 +121,34 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with export command (single-file strategy with file path mapping)' do
+    context 'with export command (single-file strategy with clean keys)' do
       let(:args) { ['export'] }
       
-      it 'exports translations to single CSV file with file path mapping' do
+      it 'exports translations to single CSV file with clean keys' do
         output = capture_stdout { cli.run }
         
         expect(output).to include('Translations exported successfully to translations.csv')
-        expect(output).to include('File contains 2 source files with file path mapping')
+        expect(output).to include('File contains all translations from 2 source files')
         expect(File.exist?('translations.csv')).to be true
         
         csv_content = CSV.read('translations.csv', headers: true)
         expect(csv_content.headers).to eq(['key', 'en', 'es'])
         
-        # Check that keys include file path mapping
+        # Check that keys are clean (no file path mapping)
         keys = csv_content.map { |row| row['key'] }
-        expect(keys).to include('hello__locales/en.yml')
-        expect(keys).to include('hello__locales/es.yml')
-        expect(keys).to include('nested.greeting__locales/en.yml')
-        expect(keys).to include('nested.greeting__locales/es.yml')
+        expect(keys).to include('hello')
+        expect(keys).to include('nested.greeting')
+        expect(keys).not_to include('hello__locales/en.yml')
+        expect(keys).not_to include('hello__locales/es.yml')
+        
+        # Check that values are correctly populated
+        hello_row = csv_content.find { |row| row['key'] == 'hello' }
+        expect(hello_row['en']).to eq('Hello')
+        expect(hello_row['es']).to eq('Hola')
+        
+        greeting_row = csv_content.find { |row| row['key'] == 'nested.greeting' }
+        expect(greeting_row['en']).to eq('Good morning')
+        expect(greeting_row['es']).to eq('')
       end
     end
     
@@ -156,23 +165,24 @@ RSpec.describe MiniI18n::CLI do
         csv_content = CSV.read(temp_csv, headers: true)
         expect(csv_content.headers).to eq(['key', 'en', 'es'])
         
-        # Check file path mapping in keys
+        # Check clean keys (no file path mapping)
         keys = csv_content.map { |row| row['key'] }
-        expect(keys).to include('hello__locales/en.yml')
+        expect(keys).to include('hello')
+        expect(keys).to include('nested.greeting')
+        expect(keys).not_to include('hello__locales/en.yml')
       end
     end
     
-    context 'with import command (single-file strategy with file path mapping)' do
+    context 'with import command (single-file strategy with clean keys)' do
       let(:args) { ['import'] }
       
       before do
-        # Create CSV file with file path mapping for import
+        # Create CSV file with clean keys (no file path mapping)
         CSV.open('translations.csv', 'w') do |csv|
           csv << ['key', 'en', 'es']
-          csv << ['hello__locales/en.yml', 'Hello Updated', '']
-          csv << ['nested.greeting__locales/en.yml', 'Good morning Updated', '']
-          csv << ['hello__locales/es.yml', '', 'Hola Actualizado']
-          csv << ['nested.greeting__locales/es.yml', '', 'Buenos días actualizados']
+          csv << ['hello', 'Hello Updated', 'Hola Actualizado']
+          csv << ['nested.greeting', 'Good morning Updated', 'Buenos días actualizados']
+          csv << ['new_key', 'New Value', 'Nuevo Valor']
         end
       end
       
@@ -187,10 +197,12 @@ RSpec.describe MiniI18n::CLI do
         en_content = YAML.load_file('locales/en.yml')
         expect(en_content['en']['hello']).to eq('Hello Updated')
         expect(en_content['en']['nested']['greeting']).to eq('Good morning Updated')
+        expect(en_content['en']['new_key']).to eq('New Value')
         
         es_content = YAML.load_file('locales/es.yml')
         expect(es_content['es']['hello']).to eq('Hola Actualizado')
         expect(es_content['es']['nested']['greeting']).to eq('Buenos días actualizados')
+        expect(es_content['es']['new_key']).to eq('Nuevo Valor')
       end
     end
     
@@ -199,24 +211,29 @@ RSpec.describe MiniI18n::CLI do
       let(:args) { ['import', "--file=#{temp_csv}"] }
       
       before do
-        # Create a CSV file with file path mapping
+        # Create a CSV file with clean keys (no file path mapping)
         CSV.open(temp_csv, 'w') do |csv|
           csv << ['key', 'en', 'es']
-          csv << ['hello__locales/en.yml', 'Custom Hello', '']
-          csv << ['new_key__locales/en.yml', 'New Value', '']
+          csv << ['hello', 'Custom Hello', 'Hola Personalizado']
+          csv << ['new_key', 'New Value', 'Nuevo Valor']
         end
       end
       
       it 'imports translations from custom CSV file' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include('Updated 1 translation files:')
+        expect(output).to include('Updated 2 translation files:')
         expect(output).to include('locales/en.yml')
+        expect(output).to include('locales/es.yml')
         
-        # Check that YAML file was updated
+        # Check that YAML files were updated
         en_content = YAML.load_file('locales/en.yml')
         expect(en_content['en']['hello']).to eq('Custom Hello')
         expect(en_content['en']['new_key']).to eq('New Value')
+        
+        es_content = YAML.load_file('locales/es.yml')
+        expect(es_content['es']['hello']).to eq('Hola Personalizado')
+        expect(es_content['es']['new_key']).to eq('Nuevo Valor')
       end
     end
   end
