@@ -1,6 +1,5 @@
 require 'mini_i18n'
 require 'optparse'
-require 'csv'
 require 'set'
 require 'yaml'
 
@@ -17,10 +16,8 @@ module MiniI18n
         stats_command
       when 'missing'
         missing_command
-      when 'import'
-        import_command
-      when 'export'
-        export_command
+      when 'unused'
+        unused_command
       when 'version'
         version_command
       when 'help', nil
@@ -73,31 +70,28 @@ module MiniI18n
       end
     end
 
-    def import_command
-      options = parse_import_options
-      csv_file = options[:file] || 'translations.csv'
+    def unused_command
+      options = parse_unused_options
+      load_translations_for_cli
       
-      unless File.exist?(csv_file)
-        puts "Error: File '#{csv_file}' not found"
-        exit 1
+      # Find all translation keys
+      all_translation_keys = collect_all_keys.to_set
+      
+      # Find used keys in source files
+      used_keys = find_used_translation_keys(options[:paths])
+      
+      # Find unused keys
+      unused_keys = (all_translation_keys - used_keys).to_a.sort
+      
+      if unused_keys.any?
+        puts "Unused translation keys:"
+        puts "======================"
+        unused_keys.each { |key| puts "  #{key}" }
+        puts ""
+        puts "Total unused keys: #{unused_keys.count}"
+      else
+        puts "No unused translation keys found"
       end
-      
-      import_from_single_csv(csv_file)
-    end
-
-    def export_command
-      options = parse_export_options
-      output_file = options[:file] || 'translations.csv'
-      
-      translation_files = find_translation_files
-      if translation_files.empty?
-        puts "Error: No translation files found"
-        exit 1
-      end
-      
-      export_to_single_csv(translation_files, output_file)
-      puts "Translations exported successfully to #{output_file}"
-      puts "File contains all translations from #{translation_files.count} source files"
     end
 
     def version_command
@@ -111,29 +105,15 @@ module MiniI18n
         Commands:
           stats                    Show translation statistics
           missing [--locale=LOCALE] Show missing translation keys
-          import [--file=FILE]     Import translations from CSV file
-          export [--file=FILE]     Export translations to CSV file
+          unused [--paths=PATHS]   Show unused translation keys
           version                  Show version
           help                     Show this help message
-
-        Export/Import Workflow:
-          1. Run 'mi18n export' to create a single CSV file from all YAML translation files
-          2. Send CSV file to translators for translation/review
-          3. Run 'mi18n import' to update original YAML files with translated content
-
-        Key Features:
-          - Single CSV file contains all translations with clean, readable keys
-          - Import automatically finds and updates the correct YAML files
-          - Preserves original file structure and organization
-          - Clean translation keys without file path information
 
         Examples:
           mi18n stats
           mi18n missing --locale=es
-          mi18n export                    # Creates translations.csv with all translations
-          mi18n export --file=custom.csv  # Creates custom.csv with all translations  
-          mi18n import                    # Updates YAML files from translations.csv
-          mi18n import --file=custom.csv  # Updates YAML files from custom.csv
+          mi18n unused                           # Scan default paths for unused keys
+          mi18n unused --paths="app/**/*.rb"     # Scan custom paths for unused keys
       HELP
     end
 
@@ -147,23 +127,20 @@ module MiniI18n
       options
     end
 
-    def parse_import_options
-      options = {}
+    def parse_unused_options
+      options = { paths: nil }
       OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to import from (default: translations.csv)') do |file|
-          options[:file] = file
+        opts.on('--paths=PATHS', 'Comma-separated glob patterns to scan (default: app/**/*.{rb,erb}, lib/**/*.rb)') do |paths|
+          options[:paths] = paths.split(',').map(&:strip)
         end
       end.parse!(@args[1..-1])
-      options
-    end
-
-    def parse_export_options
-      options = {}
-      OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to export to (default: translations.csv)') do |file|
-          options[:file] = file
-        end
-      end.parse!(@args[1..-1])
+      
+      # Set default paths if none provided
+      options[:paths] ||= [
+        'app/**/*.{rb,erb}',
+        'lib/**/*.rb'
+      ]
+      
       options
     end
 
@@ -236,199 +213,48 @@ module MiniI18n
     end
 
 
-
-    def set_nested_key(hash, key_path, value)
-      keys = key_path.split('.')
-      current = hash
+    def find_used_translation_keys(paths)
+      used_keys = Set.new
       
-      keys[0..-2].each do |key|
-        current[key] ||= {}
-        current = current[key]
-      end
-      
-      current[keys.last] = value
-    end
-
-    def find_translation_files
-      possible_patterns = [
-        'config/locales/*.yml',
-        'config/locales/*.yaml',
-        'locales/*.yml',
-        'locales/*.yaml',
-        'translations/*.yml',
-        'translations/*.yaml'
-      ]
-      
-      all_files = []
-      possible_patterns.each do |pattern|
-        all_files.concat(Dir.glob(pattern))
-      end
-      
-      all_files.uniq
-    end
-
-
-
-    def get_nested_value(hash, key_path)
-      return nil unless hash.is_a?(Hash)
-      
-      keys = key_path.split('.')
-      current = hash
-      
-      keys.each do |key|
-        return nil unless current.is_a?(Hash) && current.key?(key)
-        current = current[key]
-      end
-      
-      current
-    end
-
-    def export_to_single_csv(translation_files, output_file)
-      # Collect all unique keys across all files
-      all_keys = Set.new
-      all_locales = Set.new
-      file_contents = {}
-      
-      translation_files.each do |yaml_file|
-        yaml_content = YAML.load_file(yaml_file)
-        file_contents[yaml_file] = yaml_content
-        
-        # Add all locales from this file
-        yaml_content.keys.each { |locale| all_locales << locale }
-        
-        # Collect all unique keys from this file
-        yaml_content.each do |locale, translations|
-          collect_keys_recursive(translations).each do |key|
-            all_keys << key
-          end
-        end
-      end
-      
-      # Sort keys and locales for consistent output
-      sorted_keys = all_keys.to_a.sort
-      locales = all_locales.to_a.sort
-      
-      # Write CSV with clean keys (no file path mapping)
-      CSV.open(output_file, 'w') do |csv|
-        csv << ['key'] + locales
-        
-        sorted_keys.each do |key|
-          row = [key]
+      paths.each do |pattern|
+        Dir.glob(pattern).each do |file_path|
+          next unless File.file?(file_path)
           
-          locales.each do |locale|
-            # Find the value for this key in any file that contains this locale
-            value = ''
-            translation_files.each do |yaml_file|
-              yaml_content = file_contents[yaml_file]
-              if yaml_content.key?(locale)
-                found_value = get_nested_value(yaml_content[locale], key)
-                if found_value && !found_value.to_s.strip.empty?
-                  value = found_value
-                  break  # Use the first non-empty value found
-                end
-              end
+          begin
+            content = File.read(file_path)
+            
+            # Find translation method calls with various patterns
+            # T(:key), T('key'), T("key")
+            content.scan(/\bT\s*\(\s*:([a-zA-Z_][a-zA-Z0-9_.]*)\s*\)/) do |match|
+              used_keys << match[0]
             end
-            row << value
-          end
-          
-          csv << row
-        end
-      end
-    end
-
-    def import_from_single_csv(csv_file)
-      # Load all existing YAML files to understand their structure
-      translation_files = find_translation_files
-      if translation_files.empty?
-        puts "Error: No translation files found to update"
-        return
-      end
-      
-      # Load content of all files
-      file_contents = {}
-      translation_files.each do |yaml_file|
-        file_contents[yaml_file] = File.exist?(yaml_file) ? YAML.load_file(yaml_file) : {}
-      end
-      
-      # Process CSV and update files
-      updated_files = Set.new
-      
-      CSV.foreach(csv_file, headers: true) do |row|
-        key = row['key']
-        next if key.nil? || key.strip.empty?
-        
-        # Process each locale column
-        row.headers.each do |header|
-          next if header == 'key'
-          
-          locale = header.to_s
-          value = row[header]
-          
-          # Skip nil values, but allow empty strings
-          next if value.nil?
-          
-          # Find which files should contain this key for this locale
-          files_to_update = find_files_containing_key(key, locale, file_contents)
-          
-          # If no files contain this key+locale combination, try to find a suitable file
-          if files_to_update.empty?
-            files_to_update = find_suitable_files_for_locale(locale, file_contents)
-          end
-          
-          # Update the key in all relevant files
-          files_to_update.each do |yaml_file|
-            file_contents[yaml_file][locale] ||= {}
-            set_nested_key(file_contents[yaml_file][locale], key, value)
-            updated_files << yaml_file
+            
+            content.scan(/\bT\s*\(\s*['"]([^'"]+)['"]\s*\)/) do |match|
+              used_keys << match[0]
+            end
+            
+            # MiniI18n.t(:key), MiniI18n.t('key'), MiniI18n.translate(:key)
+            content.scan(/\bMiniI18n\.(?:t|translate)\s*\(\s*:([a-zA-Z_][a-zA-Z0-9_.]*)\s*\)/) do |match|
+              used_keys << match[0]
+            end
+            
+            content.scan(/\bMiniI18n\.(?:t|translate)\s*\(\s*['"]([^'"]+)['"]\s*\)/) do |match|
+              used_keys << match[0]
+            end
+            
+            # Handle scoped calls like T('key', scope: 'scope')
+            content.scan(/\bT\s*\(\s*['"]([^'"]+)['"]\s*,\s*scope:\s*['"]([^'"]+)['"]/) do |key, scope|
+              used_keys << "#{scope}.#{key}"
+            end
+            
+          rescue => e
+            # Skip files that can't be read (binary files, etc.)
+            next
           end
         end
       end
       
-      # Write back all updated files
-      updated_files.each do |file_path|
-        File.write(file_path, file_contents[file_path].to_yaml)
-      end
-      
-      if updated_files.any?
-        puts "Updated #{updated_files.count} translation files:"
-        updated_files.each { |file| puts "  #{file}" }
-      else
-        puts "No files were updated"
-      end
-    end
-    
-    def find_files_containing_key(key, locale, file_contents)
-      matching_files = []
-      
-      file_contents.each do |file_path, yaml_content|
-        if yaml_content.key?(locale)
-          # Check if this file contains the key (even if the value is empty)
-          existing_value = get_nested_value(yaml_content[locale], key)
-          if !existing_value.nil?
-            matching_files << file_path
-          end
-        end
-      end
-      
-      matching_files
-    end
-    
-    def find_suitable_files_for_locale(locale, file_contents)
-      # Find files that contain this locale
-      suitable_files = []
-      
-      file_contents.each do |file_path, yaml_content|
-        if yaml_content.key?(locale)
-          suitable_files << file_path
-        end
-      end
-      
-      # If no files contain this locale, use the first file (or create structure)
-      if suitable_files.empty? && !file_contents.empty?
-        suitable_files = [file_contents.keys.first]
-      end
-      
-      suitable_files
+      used_keys
     end
 
 

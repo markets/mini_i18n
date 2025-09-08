@@ -1,6 +1,5 @@
 require 'mini_i18n'
 require 'mini_i18n/cli'
-require 'csv'
 require 'tempfile'
 require 'fileutils'
 require 'yaml'
@@ -121,119 +120,122 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with export command' do
-      let(:args) { ['export'] }
-      
-      it 'exports translations to single CSV file with clean keys' do
-        output = capture_stdout { cli.run }
-        
-        expect(output).to include('Translations exported successfully to translations.csv')
-        expect(output).to include('File contains all translations from 2 source files')
-        expect(File.exist?('translations.csv')).to be true
-        
-        csv_content = CSV.read('translations.csv', headers: true)
-        expect(csv_content.headers).to eq(['key', 'en', 'es'])
-        
-        # Check that keys are clean (no file path mapping)
-        keys = csv_content.map { |row| row['key'] }
-        expect(keys).to include('hello')
-        expect(keys).to include('nested.greeting')
-        expect(keys).not_to include('hello__locales/en.yml')
-        expect(keys).not_to include('hello__locales/es.yml')
-        
-        # Check that values are correctly populated
-        hello_row = csv_content.find { |row| row['key'] == 'hello' }
-        expect(hello_row['en']).to eq('Hello')
-        expect(hello_row['es']).to eq('Hola')
-        
-        greeting_row = csv_content.find { |row| row['key'] == 'nested.greeting' }
-        expect(greeting_row['en']).to eq('Good morning')
-        expect(greeting_row['es']).to eq('')
-      end
-    end
-    
-    context 'with export command with custom file' do
-      let(:temp_csv) { File.join(temp_dir, 'custom_export.csv') }
-      let(:args) { ['export', "--file=#{temp_csv}"] }
-      
-      it 'exports translations to specified CSV file' do
-        output = capture_stdout { cli.run }
-        
-        expect(output).to include("Translations exported successfully to #{temp_csv}")
-        expect(File.exist?(temp_csv)).to be true
-        
-        csv_content = CSV.read(temp_csv, headers: true)
-        expect(csv_content.headers).to eq(['key', 'en', 'es'])
-        
-        # Check clean keys (no file path mapping)
-        keys = csv_content.map { |row| row['key'] }
-        expect(keys).to include('hello')
-        expect(keys).to include('nested.greeting')
-        expect(keys).not_to include('hello__locales/en.yml')
-      end
-    end
-    
-    context 'with import command' do
-      let(:args) { ['import'] }
+    context 'with unused command' do
+      let(:args) { ['unused'] }
       
       before do
-        # Create CSV file with clean keys (no file path mapping)
-        CSV.open('translations.csv', 'w') do |csv|
-          csv << ['key', 'en', 'es']
-          csv << ['hello', 'Hello Updated', 'Hola Actualizado']
-          csv << ['nested.greeting', 'Good morning Updated', 'Buenos días actualizados']
-          csv << ['new_key', 'New Value', 'Nuevo Valor']
-        end
+        # Create some Ruby files that use translation keys
+        FileUtils.mkdir_p('app/controllers')
+        FileUtils.mkdir_p('app/views')
+        
+        # Create Ruby file using some keys
+        File.write('app/controllers/test_controller.rb', <<~RUBY)
+          class TestController
+            def index
+              @message = T(:hello)
+              @greeting = MiniI18n.t('nested.greeting')
+            end
+          end
+        RUBY
+        
+        # Create ERB file using some keys  
+        File.write('app/views/test.html.erb', <<~ERB)
+          <h1><%= T(:hello) %></h1>
+          <p><%= T('used_key') %></p>
+        ERB
+        
+        # Add more keys to translations so we have unused ones
+        en_with_unused = {
+          'en' => {
+            'hello' => 'Hello',
+            'nested' => { 'greeting' => 'Good morning' },
+            'unused_key' => 'This key is not used',
+            'another_unused' => 'This is also unused'
+          }
+        }
+        
+        es_with_unused = {
+          'es' => {
+            'hello' => 'Hola', 
+            'nested' => { 'greeting' => '' },
+            'unused_key' => 'Esta clave no se usa',
+            'another_unused' => 'Esto tampoco se usa'
+          }
+        }
+        
+        File.write('locales/en.yml', en_with_unused.to_yaml)
+        File.write('locales/es.yml', es_with_unused.to_yaml)
       end
       
-      it 'imports translations from CSV file and updates original YAML files' do
+      it 'shows unused translation keys' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include('Updated 2 translation files:')
-        expect(output).to include('locales/en.yml')
-        expect(output).to include('locales/es.yml')
-        
-        # Check that YAML files were updated correctly
-        en_content = YAML.load_file('locales/en.yml')
-        expect(en_content['en']['hello']).to eq('Hello Updated')
-        expect(en_content['en']['nested']['greeting']).to eq('Good morning Updated')
-        expect(en_content['en']['new_key']).to eq('New Value')
-        
-        es_content = YAML.load_file('locales/es.yml')
-        expect(es_content['es']['hello']).to eq('Hola Actualizado')
-        expect(es_content['es']['nested']['greeting']).to eq('Buenos días actualizados')
-        expect(es_content['es']['new_key']).to eq('Nuevo Valor')
+        expect(output).to include('Unused translation keys:')
+        expect(output).to include('another_unused')
+        expect(output).to include('unused_key')
+        expect(output).to include('Total unused keys: 2')
+        expect(output).not_to include('hello') # This key is used
+        expect(output).not_to include('nested.greeting') # This key is used
       end
     end
     
-    context 'with import command with custom file' do
-      let(:temp_csv) { File.join(temp_dir, 'custom_import.csv') }
-      let(:args) { ['import', "--file=#{temp_csv}"] }
+    context 'with unused command with custom paths' do
+      let(:args) { ['unused', '--paths=app/**/*.rb'] }
       
       before do
-        # Create a CSV file with clean keys (no file path mapping)
-        CSV.open(temp_csv, 'w') do |csv|
-          csv << ['key', 'en', 'es']
-          csv << ['hello', 'Custom Hello', 'Hola Personalizado']
-          csv << ['new_key', 'New Value', 'Nuevo Valor']
-        end
+        # Create Ruby file that uses a key
+        FileUtils.mkdir_p('app')
+        File.write('app/test.rb', <<~RUBY)
+          puts T(:hello)
+        RUBY
+        
+        # Create another file outside the specified path that uses a key
+        FileUtils.mkdir_p('lib')
+        File.write('lib/test.rb', <<~RUBY)
+          puts T('nested.greeting')
+        RUBY
+        
+        # Add unused key to translations
+        en_with_unused = {
+          'en' => {
+            'hello' => 'Hello',
+            'nested' => { 'greeting' => 'Good morning' },
+            'unused_in_lib' => 'This key is only used in lib'
+          }
+        }
+        
+        File.write('locales/en.yml', en_with_unused.to_yaml)
       end
       
-      it 'imports translations from custom CSV file' do
+      it 'scans only specified paths and shows unused keys' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include('Updated 2 translation files:')
-        expect(output).to include('locales/en.yml')
-        expect(output).to include('locales/es.yml')
+        expect(output).to include('Unused translation keys:')
+        # Since we only scan app/**/*.rb, nested.greeting should appear unused
+        # because it's only used in lib/test.rb which is outside our scan path
+        expect(output).to include('nested.greeting')
+        expect(output).to include('unused_in_lib')
+        expect(output).not_to include('hello') # This key is used in app/test.rb
+      end
+    end
+    
+    context 'with unused command when no unused keys exist' do
+      let(:args) { ['unused'] }
+      
+      before do
+        # Create Ruby files that use all available keys
+        FileUtils.mkdir_p('app')
+        File.write('app/test.rb', <<~RUBY)
+          puts T(:hello)
+          puts T('nested.greeting')
+        RUBY
+      end
+      
+      it 'shows message when no unused keys found' do
+        output = capture_stdout { cli.run }
         
-        # Check that YAML files were updated
-        en_content = YAML.load_file('locales/en.yml')
-        expect(en_content['en']['hello']).to eq('Custom Hello')
-        expect(en_content['en']['new_key']).to eq('New Value')
-        
-        es_content = YAML.load_file('locales/es.yml')
-        expect(es_content['es']['hello']).to eq('Hola Personalizado')
-        expect(es_content['es']['new_key']).to eq('Nuevo Valor')
+        expect(output).to include('No unused translation keys found')
+        expect(output).not_to include('Total unused keys:')
       end
     end
   end
