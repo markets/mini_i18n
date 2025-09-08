@@ -2,6 +2,7 @@ require 'mini_i18n'
 require 'optparse'
 require 'csv'
 require 'set'
+require 'yaml'
 
 module MiniI18n
   class CLI
@@ -75,33 +76,53 @@ module MiniI18n
     def import_command
       options = parse_import_options
       
-      unless options[:file]
-        puts "Error: --file option is required"
-        puts "Usage: mi18n import --file=translations.csv"
-        exit 1
+      if options[:file]
+        # Import from a specific CSV file
+        unless File.exist?(options[:file])
+          puts "Error: File '#{options[:file]}' not found"
+          exit 1
+        end
+        import_from_csv_file(options[:file])
+      else
+        # Import from all CSV files in current directory
+        csv_files = Dir.glob('*.csv')
+        if csv_files.empty?
+          puts "Error: No CSV files found in current directory"
+          puts "Usage: mi18n import --file=translations.csv OR place CSV files in current directory"
+          exit 1
+        end
+        
+        csv_files.each { |file| import_from_csv_file(file) }
+        puts "Imported translations from #{csv_files.count} CSV files: #{csv_files.join(', ')}"
       end
-      
-      unless File.exist?(options[:file])
-        puts "Error: File '#{options[:file]}' not found"
-        exit 1
-      end
-      
-      # Load existing translations first
-      load_translations_for_cli
-      
-      import_from_csv(options[:file])
-      puts "Translations imported successfully from #{options[:file]}"
-      puts "Note: Imported translations are merged with existing ones in memory."
-      puts "To persist changes, use 'mi18n export' to save to files."
     end
 
     def export_command
       options = parse_export_options
-      load_translations_for_cli
       
-      output_file = options[:file] || 'translations.csv'
-      export_to_csv(output_file)
-      puts "Translations exported successfully to #{output_file}"
+      if options[:file]
+        # Export to a specific CSV file (legacy single-file mode)
+        load_translations_for_cli
+        export_to_csv(options[:file])
+        puts "Translations exported successfully to #{options[:file]}"
+      else
+        # Export using file-based strategy (new default)
+        translation_files = find_translation_files
+        if translation_files.empty?
+          puts "Error: No translation files found"
+          exit 1
+        end
+        
+        exported_files = []
+        translation_files.each do |yaml_file|
+          csv_file = File.basename(yaml_file, File.extname(yaml_file)) + '.csv'
+          export_yaml_to_csv(yaml_file, csv_file)
+          exported_files << csv_file
+        end
+        
+        puts "Exported translations to #{exported_files.count} CSV files:"
+        exported_files.each { |file| puts "  #{file}" }
+      end
     end
 
     def version_command
@@ -115,16 +136,23 @@ module MiniI18n
         Commands:
           stats                    Show translation statistics
           missing [--locale=LOCALE] Show missing translation keys
-          import --file=FILE       Import translations from CSV file
-          export [--file=FILE]     Export translations to CSV file (default: translations.csv)
+          import [--file=FILE]     Import translations from CSV file(s)
+          export [--file=FILE]     Export translations to CSV file(s)
           version                  Show version
           help                     Show this help message
+
+        Export/Import Workflow:
+          1. Run 'mi18n export' to create CSV files from your YAML translation files
+          2. Send CSV files to translators for translation/review
+          3. Run 'mi18n import' to update YAML files with translated CSV content
 
         Examples:
           mi18n stats
           mi18n missing --locale=es
-          mi18n import --file=translations.csv
-          mi18n export --file=my_translations.csv
+          mi18n export                    # Creates CSV files for each YAML file
+          mi18n export --file=all.csv     # Creates single CSV with all translations  
+          mi18n import                    # Updates YAML files from CSV files
+          mi18n import --file=all.csv     # Imports from specific CSV file
       HELP
     end
 
@@ -141,7 +169,7 @@ module MiniI18n
     def parse_import_options
       options = {}
       OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to import from') do |file|
+        opts.on('--file=FILE', 'CSV file to import from (optional - will import all CSV files if not specified)') do |file|
           options[:file] = file
         end
       end.parse!(@args[1..-1])
@@ -151,7 +179,7 @@ module MiniI18n
     def parse_export_options
       options = {}
       OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to export to') do |file|
+        opts.on('--file=FILE', 'CSV file to export to (optional - will create multiple CSV files if not specified)') do |file|
           options[:file] = file
         end
       end.parse!(@args[1..-1])
@@ -282,6 +310,130 @@ module MiniI18n
       end
       
       current[keys.last] = value
+    end
+
+    def find_translation_files
+      possible_patterns = [
+        'config/locales/*.yml',
+        'config/locales/*.yaml',
+        'locales/*.yml',
+        'locales/*.yaml',
+        'translations/*.yml',
+        'translations/*.yaml'
+      ]
+      
+      all_files = []
+      possible_patterns.each do |pattern|
+        all_files.concat(Dir.glob(pattern))
+      end
+      
+      all_files.uniq
+    end
+
+    def export_yaml_to_csv(yaml_file, csv_file)
+      # Load the specific YAML file
+      yaml_content = YAML.load_file(yaml_file)
+      
+      # Extract all locales from this file
+      locales = yaml_content.keys
+      
+      # Collect all keys from all locales in this file
+      all_keys = Set.new
+      yaml_content.each do |locale, translations|
+        collect_keys_recursive(translations).each { |key| all_keys << key }
+      end
+      
+      # Write CSV
+      CSV.open(csv_file, 'w') do |csv|
+        csv << ['key'] + locales
+        
+        all_keys.to_a.sort.each do |key|
+          row = [key]
+          locales.each do |locale|
+            value = get_nested_value(yaml_content[locale], key) || ''
+            row << value
+          end
+          csv << row
+        end
+      end
+    end
+
+    def import_from_csv_file(csv_file)
+      # Determine corresponding YAML file
+      base_name = File.basename(csv_file, '.csv')
+      yaml_file = find_corresponding_yaml_file(base_name)
+      
+      if yaml_file
+        # File-based import: update specific YAML file
+        import_to_yaml_file(csv_file, yaml_file)
+      else
+        # Legacy import: merge into memory (for backward compatibility)
+        puts "Warning: Could not find corresponding YAML file for #{csv_file}."
+        puts "Importing into memory. Changes will not be persisted to files."
+        load_translations_for_cli
+        import_from_csv(csv_file)
+      end
+    end
+
+    def import_to_yaml_file(csv_file, yaml_file)
+      # Load existing YAML content or create new structure
+      yaml_content = File.exist?(yaml_file) ? YAML.load_file(yaml_file) : {}
+      
+      # Read CSV and update YAML content
+      CSV.foreach(csv_file, headers: true) do |row|
+        key = row['key']
+        next if key.nil? || key.strip.empty?
+        
+        row.headers.each do |header|
+          next if header == 'key'
+          
+          locale = header.to_s
+          value = row[header]
+          
+          # Skip nil values, but allow empty strings (they might be intentional)
+          next if value.nil?
+          
+          yaml_content[locale] ||= {}
+          set_nested_key(yaml_content[locale], key, value)
+        end
+      end
+      
+      # Write back to YAML file
+      File.write(yaml_file, yaml_content.to_yaml)
+      puts "Updated #{yaml_file} from #{csv_file}"
+    end
+
+    def find_corresponding_yaml_file(base_name)
+      possible_extensions = ['.yml', '.yaml']
+      possible_patterns = [
+        'config/locales/',
+        'locales/',
+        'translations/',
+        ''  # current directory
+      ]
+      
+      possible_patterns.each do |path|
+        possible_extensions.each do |ext|
+          candidate = "#{path}#{base_name}#{ext}"
+          return candidate if File.exist?(candidate)
+        end
+      end
+      
+      nil
+    end
+
+    def get_nested_value(hash, key_path)
+      return nil unless hash.is_a?(Hash)
+      
+      keys = key_path.split('.')
+      current = hash
+      
+      keys.each do |key|
+        return nil unless current.is_a?(Hash) && current.key?(key)
+        current = current[key]
+      end
+      
+      current
     end
   end
 end

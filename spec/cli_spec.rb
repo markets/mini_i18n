@@ -121,11 +121,41 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with export command' do
+    context 'with export command (file-based strategy)' do
+      let(:args) { ['export'] }
+      
+      it 'exports translations to multiple CSV files based on YAML files' do
+        output = capture_stdout { cli.run }
+        
+        expect(output).to include('Exported translations to 2 CSV files:')
+        expect(output).to include('en.csv')
+        expect(output).to include('es.csv')
+        
+        # Check that CSV files were created
+        expect(File.exist?('en.csv')).to be true
+        expect(File.exist?('es.csv')).to be true
+        
+        # Check en.csv content
+        en_content = CSV.read('en.csv', headers: true)
+        expect(en_content.headers).to eq(['key', 'en'])
+        expect(en_content.map(&:to_h)).to include(
+          { 'key' => 'hello', 'en' => 'Hello' }
+        )
+        
+        # Check es.csv content
+        es_content = CSV.read('es.csv', headers: true)
+        expect(es_content.headers).to eq(['key', 'es'])
+        expect(es_content.map(&:to_h)).to include(
+          { 'key' => 'hello', 'es' => 'Hola' }
+        )
+      end
+    end
+    
+    context 'with export command (legacy single-file strategy)' do
       let(:temp_csv) { File.join(temp_dir, 'test_export.csv') }
       let(:args) { ['export', "--file=#{temp_csv}"] }
       
-      it 'exports translations to CSV' do
+      it 'exports translations to single CSV file' do
         output = capture_stdout { cli.run }
         
         expect(output).to include("Translations exported successfully to #{temp_csv}")
@@ -139,12 +169,48 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with import command' do
+    context 'with import command (file-based strategy)' do
+      let(:args) { ['import'] }
+      
+      before do
+        # Create CSV files for import
+        CSV.open('en.csv', 'w') do |csv|
+          csv << ['key', 'en']
+          csv << ['hello', 'Hello Updated']
+          csv << ['new_key', 'New Value']
+        end
+        
+        CSV.open('es.csv', 'w') do |csv|
+          csv << ['key', 'es']
+          csv << ['hello', 'Hola Actualizado']
+          csv << ['nested.greeting', 'Buenos días actualizados']
+        end
+      end
+      
+      it 'imports translations from CSV files and updates YAML files' do
+        output = capture_stdout { cli.run }
+        
+        expect(output).to include('Updated locales/en.yml from en.csv')
+        expect(output).to include('Updated locales/es.yml from es.csv')
+        expect(output).to include('Imported translations from 2 CSV files')
+        
+        # Check that YAML files were updated
+        en_content = YAML.load_file('locales/en.yml')
+        expect(en_content['en']['hello']).to eq('Hello Updated')
+        expect(en_content['en']['new_key']).to eq('New Value')
+        
+        es_content = YAML.load_file('locales/es.yml')
+        expect(es_content['es']['hello']).to eq('Hola Actualizado')
+        expect(es_content['es']['nested']['greeting']).to eq('Buenos días actualizados')
+      end
+    end
+    
+    context 'with import command (legacy single-file strategy)' do
       let(:temp_csv) { File.join(temp_dir, 'test_import.csv') }
       let(:args) { ['import', "--file=#{temp_csv}"] }
       
       before do
-        # Create a CSV file to import
+        # Create a CSV file to import that doesn't correspond to existing YAML files
         CSV.open(temp_csv, 'w') do |csv|
           csv << ['key', 'en', 'es']
           csv << ['hello', 'Hello', 'Hola']
@@ -152,10 +218,11 @@ RSpec.describe MiniI18n::CLI do
         end
       end
       
-      it 'imports translations from CSV' do
+      it 'imports translations from single CSV file (legacy mode)' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include("Translations imported successfully from #{temp_csv}")
+        expect(output).to include("Warning: Could not find corresponding YAML file")
+        expect(output).to include("Importing into memory")
       end
     end
   end
