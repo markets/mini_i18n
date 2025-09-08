@@ -1,5 +1,7 @@
+require 'mini_i18n'
 require 'optparse'
 require 'csv'
+require 'set'
 
 module MiniI18n
   class CLI
