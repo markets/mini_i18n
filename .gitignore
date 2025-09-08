@@ -4,3 +4,10 @@
 /pkg/
 /tmp/
 Gemfile.lock
+
+# Test files and temporary directories
+test_export.csv
+test_import.csv
+locales/
+translations/
+config/locales/

@@ -1,7 +1,0 @@
-fr:
-  hello: "Bonjour"
-  bye: ""
-  welcome: ""
-  nested:
-    greeting: ""
-    farewell: ""
