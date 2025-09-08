@@ -121,7 +121,7 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with export command (single-file strategy with clean keys)' do
+    context 'with export command' do
       let(:args) { ['export'] }
       
       it 'exports translations to single CSV file with clean keys' do
@@ -173,7 +173,7 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with import command (single-file strategy with clean keys)' do
+    context 'with import command' do
       let(:args) { ['import'] }
       
       before do

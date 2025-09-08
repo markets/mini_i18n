@@ -82,21 +82,20 @@ module MiniI18n
         exit 1
       end
       
-      import_from_single_csv_with_mapping(csv_file)
+      import_from_single_csv(csv_file)
     end
 
     def export_command
       options = parse_export_options
       output_file = options[:file] || 'translations.csv'
       
-      # Use single-file export with clean keys (no file path mapping)
       translation_files = find_translation_files
       if translation_files.empty?
         puts "Error: No translation files found"
         exit 1
       end
       
-      export_all_to_single_csv(translation_files, output_file)
+      export_to_single_csv(translation_files, output_file)
       puts "Translations exported successfully to #{output_file}"
       puts "File contains all translations from #{translation_files.count} source files"
     end
@@ -126,7 +125,7 @@ module MiniI18n
           - Single CSV file contains all translations with clean, readable keys
           - Import automatically finds and updates the correct YAML files
           - Preserves original file structure and organization
-          - No complex key mapping - translators work with clean translation keys
+          - Clean translation keys without file path information
 
         Examples:
           mi18n stats
@@ -236,51 +235,7 @@ module MiniI18n
       end
     end
 
-    def import_from_csv(file_path)
-      translations_by_locale = {}
-      
-      CSV.foreach(file_path, headers: true) do |row|
-        key = row['key']
-        next if key.nil? || key.strip.empty?
-        
-        row.headers.each do |header|
-          next if header == 'key' || row[header].nil?
-          
-          locale = header.to_s
-          value = row[header].to_s
-          
-          next if value.strip.empty?
-          
-          translations_by_locale[locale] ||= {}
-          set_nested_key(translations_by_locale[locale], key, value)
-        end
-      end
-      
-      # Load the imported translations
-      translations_by_locale.each do |locale, translations|
-        MiniI18n.send(:add_translations, locale, translations)
-      end
-    end
 
-    def export_to_csv(file_path)
-      all_keys = collect_all_keys
-      locales = MiniI18n.available_locales
-      
-      CSV.open(file_path, 'w') do |csv|
-        # Write header
-        csv << ['key'] + locales
-        
-        # Write data
-        all_keys.each do |key|
-          row = [key]
-          locales.each do |locale|
-            value = MiniI18n.t(key, locale: locale, default: '')
-            row << value
-          end
-          csv << row
-        end
-      end
-    end
 
     def set_nested_key(hash, key_path, value)
       keys = key_path.split('.')
@@ -312,97 +267,7 @@ module MiniI18n
       all_files.uniq
     end
 
-    def export_yaml_to_csv(yaml_file, csv_file)
-      # Load the specific YAML file
-      yaml_content = YAML.load_file(yaml_file)
-      
-      # Extract all locales from this file
-      locales = yaml_content.keys
-      
-      # Collect all keys from all locales in this file
-      all_keys = Set.new
-      yaml_content.each do |locale, translations|
-        collect_keys_recursive(translations).each { |key| all_keys << key }
-      end
-      
-      # Write CSV
-      CSV.open(csv_file, 'w') do |csv|
-        csv << ['key'] + locales
-        
-        all_keys.to_a.sort.each do |key|
-          row = [key]
-          locales.each do |locale|
-            value = get_nested_value(yaml_content[locale], key) || ''
-            row << value
-          end
-          csv << row
-        end
-      end
-    end
 
-    def import_from_csv_file(csv_file)
-      # Determine corresponding YAML file
-      base_name = File.basename(csv_file, '.csv')
-      yaml_file = find_corresponding_yaml_file(base_name)
-      
-      if yaml_file
-        # File-based import: update specific YAML file
-        import_to_yaml_file(csv_file, yaml_file)
-      else
-        # Legacy import: merge into memory (for backward compatibility)
-        puts "Warning: Could not find corresponding YAML file for #{csv_file}."
-        puts "Importing into memory. Changes will not be persisted to files."
-        load_translations_for_cli
-        import_from_csv(csv_file)
-      end
-    end
-
-    def import_to_yaml_file(csv_file, yaml_file)
-      # Load existing YAML content or create new structure
-      yaml_content = File.exist?(yaml_file) ? YAML.load_file(yaml_file) : {}
-      
-      # Read CSV and update YAML content
-      CSV.foreach(csv_file, headers: true) do |row|
-        key = row['key']
-        next if key.nil? || key.strip.empty?
-        
-        row.headers.each do |header|
-          next if header == 'key'
-          
-          locale = header.to_s
-          value = row[header]
-          
-          # Skip nil values, but allow empty strings (they might be intentional)
-          next if value.nil?
-          
-          yaml_content[locale] ||= {}
-          set_nested_key(yaml_content[locale], key, value)
-        end
-      end
-      
-      # Write back to YAML file
-      File.write(yaml_file, yaml_content.to_yaml)
-      puts "Updated #{yaml_file} from #{csv_file}"
-    end
-
-    def find_corresponding_yaml_file(base_name)
-      possible_extensions = ['.yml', '.yaml']
-      possible_patterns = [
-        'config/locales/',
-        'locales/',
-        'translations/',
-        ''  # current directory
-      ]
-      
-      possible_patterns.each do |path|
-        possible_extensions.each do |ext|
-          candidate = "#{path}#{base_name}#{ext}"
-          return candidate if File.exist?(candidate)
-        end
-      end
-      
-      nil
-    end
 
     def get_nested_value(hash, key_path)
       return nil unless hash.is_a?(Hash)
@@ -418,7 +283,7 @@ module MiniI18n
       current
     end
 
-    def export_all_to_single_csv(translation_files, output_file)
+    def export_to_single_csv(translation_files, output_file)
       # Collect all unique keys across all files
       all_keys = Set.new
       all_locales = Set.new
@@ -471,7 +336,7 @@ module MiniI18n
       end
     end
 
-    def import_from_single_csv_with_mapping(csv_file)
+    def import_from_single_csv(csv_file)
       # Load all existing YAML files to understand their structure
       translation_files = find_translation_files
       if translation_files.empty?
@@ -566,14 +431,6 @@ module MiniI18n
       suitable_files
     end
 
-    def merge_translations(target, source)
-      source.each do |key, value|
-        if value.is_a?(Hash) && target[key].is_a?(Hash)
-          merge_translations(target[key], value)
-        else
-          target[key] = value
-        end
-      end
-    end
+
   end
 end
