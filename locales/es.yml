@@ -1,0 +1,7 @@
+es:
+  hello: "Hola"
+  bye: "Adiós"
+  welcome: ""
+  nested:
+    greeting: "Buenos días"
+    farewell: ""

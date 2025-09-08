@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+
+require 'mini_i18n'
+require 'mini_i18n/cli'
+require 'set'
+
+MiniI18n::CLI.new(ARGV).run

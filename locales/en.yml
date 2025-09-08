@@ -1,0 +1,7 @@
+en:
+  hello: "Hello"
+  bye: "Goodbye"
+  welcome: "Welcome"
+  nested:
+    greeting: "Good morning"
+    farewell: "See you later"

@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir.glob("lib/**/*")
   spec.test_files    = Dir.glob("spec/**/*")
   spec.require_paths = ["lib"]
+  spec.executables   = ["mi18n"]
 
   spec.required_ruby_version = ">= 2.3"
 
