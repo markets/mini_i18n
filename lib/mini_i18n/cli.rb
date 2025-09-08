@@ -130,21 +130,23 @@ module MiniI18n
     def parse_unused_options
       options = { paths: nil }
       OptionParser.new do |opts|
-        opts.on('--paths=PATHS', 'Comma-separated glob patterns to scan (default: app/**/*.{rb,erb}, lib/**/*.rb)') do |paths|
+        opts.on('--paths=PATHS', 'Comma-separated glob patterns to scan (default: ./**/*.{rb,erb})') do |paths|
           options[:paths] = paths.split(',').map(&:strip)
         end
       end.parse!(@args[1..-1])
       
       # Set default paths if none provided
       options[:paths] ||= [
-        'app/**/*.{rb,erb}',
-        'lib/**/*.rb'
+        './**/*.{rb,erb}'
       ]
       
       options
     end
 
     def load_translations_for_cli
+      # Check if translations are already loaded
+      return unless MiniI18n.translations.empty?
+      
       # Try to load translations from common locations
       possible_paths = [
         'config/locales/*.yml',

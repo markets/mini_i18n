@@ -1,4 +1,3 @@
-require 'mini_i18n'
 require 'mini_i18n/cli'
 require 'tempfile'
 require 'fileutils'
