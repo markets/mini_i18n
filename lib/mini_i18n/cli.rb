@@ -75,54 +75,30 @@ module MiniI18n
 
     def import_command
       options = parse_import_options
+      csv_file = options[:file] || 'translations.csv'
       
-      if options[:file]
-        # Import from a specific CSV file
-        unless File.exist?(options[:file])
-          puts "Error: File '#{options[:file]}' not found"
-          exit 1
-        end
-        import_from_csv_file(options[:file])
-      else
-        # Import from all CSV files in current directory
-        csv_files = Dir.glob('*.csv')
-        if csv_files.empty?
-          puts "Error: No CSV files found in current directory"
-          puts "Usage: mi18n import --file=translations.csv OR place CSV files in current directory"
-          exit 1
-        end
-        
-        csv_files.each { |file| import_from_csv_file(file) }
-        puts "Imported translations from #{csv_files.count} CSV files: #{csv_files.join(', ')}"
+      unless File.exist?(csv_file)
+        puts "Error: File '#{csv_file}' not found"
+        exit 1
       end
+      
+      import_from_single_csv_with_mapping(csv_file)
     end
 
     def export_command
       options = parse_export_options
+      output_file = options[:file] || 'translations.csv'
       
-      if options[:file]
-        # Export to a specific CSV file (legacy single-file mode)
-        load_translations_for_cli
-        export_to_csv(options[:file])
-        puts "Translations exported successfully to #{options[:file]}"
-      else
-        # Export using file-based strategy (new default)
-        translation_files = find_translation_files
-        if translation_files.empty?
-          puts "Error: No translation files found"
-          exit 1
-        end
-        
-        exported_files = []
-        translation_files.each do |yaml_file|
-          csv_file = File.basename(yaml_file, File.extname(yaml_file)) + '.csv'
-          export_yaml_to_csv(yaml_file, csv_file)
-          exported_files << csv_file
-        end
-        
-        puts "Exported translations to #{exported_files.count} CSV files:"
-        exported_files.each { |file| puts "  #{file}" }
+      # Always use single-file export with file path mapping
+      translation_files = find_translation_files
+      if translation_files.empty?
+        puts "Error: No translation files found"
+        exit 1
       end
+      
+      export_all_to_single_csv(translation_files, output_file)
+      puts "Translations exported successfully to #{output_file}"
+      puts "File contains #{translation_files.count} source files with file path mapping"
     end
 
     def version_command
@@ -136,23 +112,29 @@ module MiniI18n
         Commands:
           stats                    Show translation statistics
           missing [--locale=LOCALE] Show missing translation keys
-          import [--file=FILE]     Import translations from CSV file(s)
-          export [--file=FILE]     Export translations to CSV file(s)
+          import [--file=FILE]     Import translations from CSV file
+          export [--file=FILE]     Export translations to CSV file
           version                  Show version
           help                     Show this help message
 
         Export/Import Workflow:
-          1. Run 'mi18n export' to create CSV files from your YAML translation files
-          2. Send CSV files to translators for translation/review
-          3. Run 'mi18n import' to update YAML files with translated CSV content
+          1. Run 'mi18n export' to create a single CSV file from all YAML translation files
+          2. Send CSV file to translators for translation/review
+          3. Run 'mi18n import' to update original YAML files with translated content
+
+        Key Features:
+          - Single CSV file contains all translations with file path mapping
+          - Keys are formatted as 'translation.key__path/to/file.yml' for easy identification
+          - Import automatically restores translations to their original YAML files
+          - Preserves original file structure and organization
 
         Examples:
           mi18n stats
           mi18n missing --locale=es
-          mi18n export                    # Creates CSV files for each YAML file
-          mi18n export --file=all.csv     # Creates single CSV with all translations  
-          mi18n import                    # Updates YAML files from CSV files
-          mi18n import --file=all.csv     # Imports from specific CSV file
+          mi18n export                    # Creates translations.csv with all translations
+          mi18n export --file=custom.csv  # Creates custom.csv with all translations  
+          mi18n import                    # Updates YAML files from translations.csv
+          mi18n import --file=custom.csv  # Updates YAML files from custom.csv
       HELP
     end
 
@@ -169,7 +151,7 @@ module MiniI18n
     def parse_import_options
       options = {}
       OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to import from (optional - will import all CSV files if not specified)') do |file|
+        opts.on('--file=FILE', 'CSV file to import from (default: translations.csv)') do |file|
           options[:file] = file
         end
       end.parse!(@args[1..-1])
@@ -179,7 +161,7 @@ module MiniI18n
     def parse_export_options
       options = {}
       OptionParser.new do |opts|
-        opts.on('--file=FILE', 'CSV file to export to (optional - will create multiple CSV files if not specified)') do |file|
+        opts.on('--file=FILE', 'CSV file to export to (default: translations.csv)') do |file|
           options[:file] = file
         end
       end.parse!(@args[1..-1])
@@ -434,6 +416,137 @@ module MiniI18n
       end
       
       current
+    end
+
+    def export_all_to_single_csv(translation_files, output_file)
+      # Collect all keys with their source file paths
+      all_key_file_pairs = []
+      all_locales = Set.new
+      
+      translation_files.each do |yaml_file|
+        yaml_content = YAML.load_file(yaml_file)
+        
+        # Add all locales from this file
+        yaml_content.keys.each { |locale| all_locales << locale }
+        
+        # Collect keys with file path mapping
+        yaml_content.each do |locale, translations|
+          collect_keys_recursive(translations).each do |key|
+            # Create mapped key: original_key__file_path
+            mapped_key = "#{key}__#{yaml_file}"
+            all_key_file_pairs << [mapped_key, key, yaml_file, yaml_content]
+          end
+        end
+      end
+      
+      # Remove duplicates and sort
+      all_key_file_pairs = all_key_file_pairs.uniq { |item| item[0] }.sort_by { |item| item[0] }
+      locales = all_locales.to_a.sort
+      
+      # Write CSV
+      CSV.open(output_file, 'w') do |csv|
+        csv << ['key'] + locales
+        
+        all_key_file_pairs.each do |mapped_key, original_key, yaml_file, yaml_content|
+          row = [mapped_key]
+          
+          locales.each do |locale|
+            if yaml_content.key?(locale)
+              value = get_nested_value(yaml_content[locale], original_key) || ''
+            else
+              value = ''
+            end
+            row << value
+          end
+          
+          csv << row
+        end
+      end
+    end
+
+    def import_from_single_csv_with_mapping(csv_file)
+      # Group translations by source file, but only include keys that originally belonged to that file
+      translations_by_file = {}
+      
+      CSV.foreach(csv_file, headers: true) do |row|
+        mapped_key = row['key']
+        next if mapped_key.nil? || mapped_key.strip.empty?
+        
+        # Parse the mapped key to extract original key and file path
+        if mapped_key.include?('__')
+          original_key, file_path = mapped_key.split('__', 2)
+        else
+          # Fallback for keys without file mapping (backward compatibility)
+          original_key = mapped_key
+          file_path = nil
+        end
+        
+        # Skip if we can't determine the file path
+        next if file_path.nil?
+        
+        # Initialize file structure if needed
+        translations_by_file[file_path] ||= {}
+        
+        # Load the original file to determine which locales it contained
+        if File.exist?(file_path)
+          original_content = YAML.load_file(file_path)
+          original_locales = original_content.keys
+        else
+          # If file doesn't exist, we'll take all locales from CSV
+          original_locales = row.headers.reject { |h| h == 'key' }
+        end
+        
+        # Process each locale column, but only for locales that were in the original file
+        row.headers.each do |header|
+          next if header == 'key'
+          
+          locale = header.to_s
+          value = row[header]
+          
+          # Skip this locale if it wasn't in the original file
+          next unless original_locales.include?(locale)
+          
+          # Skip nil values, but allow empty strings
+          next if value.nil?
+          
+          translations_by_file[file_path][locale] ||= {}
+          set_nested_key(translations_by_file[file_path][locale], original_key, value)
+        end
+      end
+      
+      # Update each source file
+      updated_files = []
+      translations_by_file.each do |file_path, locale_data|
+        # Load existing YAML content or create new
+        yaml_content = File.exist?(file_path) ? YAML.load_file(file_path) : {}
+        
+        # Merge new translations
+        locale_data.each do |locale, translations|
+          yaml_content[locale] ||= {}
+          merge_translations(yaml_content[locale], translations)
+        end
+        
+        # Write back to file
+        File.write(file_path, yaml_content.to_yaml)
+        updated_files << file_path
+      end
+      
+      if updated_files.any?
+        puts "Updated #{updated_files.count} translation files:"
+        updated_files.each { |file| puts "  #{file}" }
+      else
+        puts "No files were updated (no valid file mappings found in CSV)"
+      end
+    end
+
+    def merge_translations(target, source)
+      source.each do |key, value|
+        if value.is_a?(Hash) && target[key].is_a?(Hash)
+          merge_translations(target[key], value)
+        else
+          target[key] = value
+        end
+      end
     end
   end
 end

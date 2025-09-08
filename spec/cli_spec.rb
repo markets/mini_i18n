@@ -121,41 +121,33 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with export command (file-based strategy)' do
+    context 'with export command (single-file strategy with file path mapping)' do
       let(:args) { ['export'] }
       
-      it 'exports translations to multiple CSV files based on YAML files' do
+      it 'exports translations to single CSV file with file path mapping' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include('Exported translations to 2 CSV files:')
-        expect(output).to include('en.csv')
-        expect(output).to include('es.csv')
+        expect(output).to include('Translations exported successfully to translations.csv')
+        expect(output).to include('File contains 2 source files with file path mapping')
+        expect(File.exist?('translations.csv')).to be true
         
-        # Check that CSV files were created
-        expect(File.exist?('en.csv')).to be true
-        expect(File.exist?('es.csv')).to be true
+        csv_content = CSV.read('translations.csv', headers: true)
+        expect(csv_content.headers).to eq(['key', 'en', 'es'])
         
-        # Check en.csv content
-        en_content = CSV.read('en.csv', headers: true)
-        expect(en_content.headers).to eq(['key', 'en'])
-        expect(en_content.map(&:to_h)).to include(
-          { 'key' => 'hello', 'en' => 'Hello' }
-        )
-        
-        # Check es.csv content
-        es_content = CSV.read('es.csv', headers: true)
-        expect(es_content.headers).to eq(['key', 'es'])
-        expect(es_content.map(&:to_h)).to include(
-          { 'key' => 'hello', 'es' => 'Hola' }
-        )
+        # Check that keys include file path mapping
+        keys = csv_content.map { |row| row['key'] }
+        expect(keys).to include('hello__locales/en.yml')
+        expect(keys).to include('hello__locales/es.yml')
+        expect(keys).to include('nested.greeting__locales/en.yml')
+        expect(keys).to include('nested.greeting__locales/es.yml')
       end
     end
     
-    context 'with export command (legacy single-file strategy)' do
-      let(:temp_csv) { File.join(temp_dir, 'test_export.csv') }
+    context 'with export command with custom file' do
+      let(:temp_csv) { File.join(temp_dir, 'custom_export.csv') }
       let(:args) { ['export', "--file=#{temp_csv}"] }
       
-      it 'exports translations to single CSV file' do
+      it 'exports translations to specified CSV file' do
         output = capture_stdout { cli.run }
         
         expect(output).to include("Translations exported successfully to #{temp_csv}")
@@ -163,41 +155,38 @@ RSpec.describe MiniI18n::CLI do
         
         csv_content = CSV.read(temp_csv, headers: true)
         expect(csv_content.headers).to eq(['key', 'en', 'es'])
-        expect(csv_content.map(&:to_h)).to include(
-          { 'key' => 'hello', 'en' => 'Hello', 'es' => 'Hola' }
-        )
+        
+        # Check file path mapping in keys
+        keys = csv_content.map { |row| row['key'] }
+        expect(keys).to include('hello__locales/en.yml')
       end
     end
     
-    context 'with import command (file-based strategy)' do
+    context 'with import command (single-file strategy with file path mapping)' do
       let(:args) { ['import'] }
       
       before do
-        # Create CSV files for import
-        CSV.open('en.csv', 'w') do |csv|
-          csv << ['key', 'en']
-          csv << ['hello', 'Hello Updated']
-          csv << ['new_key', 'New Value']
-        end
-        
-        CSV.open('es.csv', 'w') do |csv|
-          csv << ['key', 'es']
-          csv << ['hello', 'Hola Actualizado']
-          csv << ['nested.greeting', 'Buenos días actualizados']
+        # Create CSV file with file path mapping for import
+        CSV.open('translations.csv', 'w') do |csv|
+          csv << ['key', 'en', 'es']
+          csv << ['hello__locales/en.yml', 'Hello Updated', '']
+          csv << ['nested.greeting__locales/en.yml', 'Good morning Updated', '']
+          csv << ['hello__locales/es.yml', '', 'Hola Actualizado']
+          csv << ['nested.greeting__locales/es.yml', '', 'Buenos días actualizados']
         end
       end
       
-      it 'imports translations from CSV files and updates YAML files' do
+      it 'imports translations from CSV file and updates original YAML files' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include('Updated locales/en.yml from en.csv')
-        expect(output).to include('Updated locales/es.yml from es.csv')
-        expect(output).to include('Imported translations from 2 CSV files')
+        expect(output).to include('Updated 2 translation files:')
+        expect(output).to include('locales/en.yml')
+        expect(output).to include('locales/es.yml')
         
-        # Check that YAML files were updated
+        # Check that YAML files were updated correctly
         en_content = YAML.load_file('locales/en.yml')
         expect(en_content['en']['hello']).to eq('Hello Updated')
-        expect(en_content['en']['new_key']).to eq('New Value')
+        expect(en_content['en']['nested']['greeting']).to eq('Good morning Updated')
         
         es_content = YAML.load_file('locales/es.yml')
         expect(es_content['es']['hello']).to eq('Hola Actualizado')
@@ -205,24 +194,29 @@ RSpec.describe MiniI18n::CLI do
       end
     end
     
-    context 'with import command (legacy single-file strategy)' do
-      let(:temp_csv) { File.join(temp_dir, 'test_import.csv') }
+    context 'with import command with custom file' do
+      let(:temp_csv) { File.join(temp_dir, 'custom_import.csv') }
       let(:args) { ['import', "--file=#{temp_csv}"] }
       
       before do
-        # Create a CSV file to import that doesn't correspond to existing YAML files
+        # Create a CSV file with file path mapping
         CSV.open(temp_csv, 'w') do |csv|
           csv << ['key', 'en', 'es']
-          csv << ['hello', 'Hello', 'Hola']
-          csv << ['goodbye', 'Goodbye', 'Adiós']
+          csv << ['hello__locales/en.yml', 'Custom Hello', '']
+          csv << ['new_key__locales/en.yml', 'New Value', '']
         end
       end
       
-      it 'imports translations from single CSV file (legacy mode)' do
+      it 'imports translations from custom CSV file' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include("Warning: Could not find corresponding YAML file")
-        expect(output).to include("Importing into memory")
+        expect(output).to include('Updated 1 translation files:')
+        expect(output).to include('locales/en.yml')
+        
+        # Check that YAML file was updated
+        en_content = YAML.load_file('locales/en.yml')
+        expect(en_content['en']['hello']).to eq('Custom Hello')
+        expect(en_content['en']['new_key']).to eq('New Value')
       end
     end
   end
