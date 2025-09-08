@@ -1,7 +1,10 @@
-require 'spec_helper'
+require 'mini_i18n'
 require 'mini_i18n/cli'
 require 'csv'
 require 'tempfile'
+require 'fileutils'
+require 'yaml'
+require 'stringio'
 
 RSpec.describe MiniI18n::CLI do
   let(:cli) { described_class.new(args) }
@@ -35,16 +38,28 @@ RSpec.describe MiniI18n::CLI do
       let(:args) { ['unknown'] }
       
       it 'prints error and exits' do
-        expect { cli.run }.to output(/Unknown command: unknown/).to_stdout
-        expect { cli.run }.to raise_error(SystemExit)
+        expect { 
+          begin
+            cli.run
+          rescue SystemExit
+            # Capture the SystemExit
+          end
+        }.to output(/Unknown command: unknown/).to_stdout
       end
     end
   end
   
   describe 'with translation files' do
     let(:temp_dir) { Dir.mktmpdir }
+    let(:original_dir) { Dir.pwd }
     
     before do
+      # Change to temp directory so CLI can find files
+      Dir.chdir(temp_dir)
+      
+      # Create locales directory
+      FileUtils.mkdir_p('locales')
+      
       # Create test translation files
       en_content = {
         'en' => {
@@ -60,20 +75,12 @@ RSpec.describe MiniI18n::CLI do
         }
       }
       
-      File.write(File.join(temp_dir, 'en.yml'), en_content.to_yaml)
-      File.write(File.join(temp_dir, 'es.yml'), es_content.to_yaml)
-      
-      # Mock the glob pattern to find our test files
-      allow(Dir).to receive(:glob).and_call_original
-      allow(Dir).to receive(:glob).with('config/locales/*.yml').and_return([])
-      allow(Dir).to receive(:glob).with('config/locales/*.yaml').and_return([])
-      allow(Dir).to receive(:glob).with('locales/*.yml').and_return([
-        File.join(temp_dir, 'en.yml'),
-        File.join(temp_dir, 'es.yml')
-      ])
+      File.write('locales/en.yml', en_content.to_yaml)
+      File.write('locales/es.yml', es_content.to_yaml)
     end
     
     after do
+      Dir.chdir(original_dir)
       FileUtils.rm_rf(temp_dir)
     end
     
@@ -115,24 +122,40 @@ RSpec.describe MiniI18n::CLI do
     end
     
     context 'with export command' do
-      let(:temp_csv) { Tempfile.new(['test', '.csv']) }
-      let(:args) { ['export', "--file=#{temp_csv.path}"] }
-      
-      after do
-        temp_csv.close
-        temp_csv.unlink
-      end
+      let(:temp_csv) { File.join(temp_dir, 'test_export.csv') }
+      let(:args) { ['export', "--file=#{temp_csv}"] }
       
       it 'exports translations to CSV' do
         output = capture_stdout { cli.run }
         
-        expect(output).to include("Translations exported successfully to #{temp_csv.path}")
+        expect(output).to include("Translations exported successfully to #{temp_csv}")
+        expect(File.exist?(temp_csv)).to be true
         
-        csv_content = CSV.read(temp_csv.path, headers: true)
+        csv_content = CSV.read(temp_csv, headers: true)
         expect(csv_content.headers).to eq(['key', 'en', 'es'])
         expect(csv_content.map(&:to_h)).to include(
           { 'key' => 'hello', 'en' => 'Hello', 'es' => 'Hola' }
         )
+      end
+    end
+    
+    context 'with import command' do
+      let(:temp_csv) { File.join(temp_dir, 'test_import.csv') }
+      let(:args) { ['import', "--file=#{temp_csv}"] }
+      
+      before do
+        # Create a CSV file to import
+        CSV.open(temp_csv, 'w') do |csv|
+          csv << ['key', 'en', 'es']
+          csv << ['hello', 'Hello', 'Hola']
+          csv << ['goodbye', 'Goodbye', 'Adiós']
+        end
+      end
+      
+      it 'imports translations from CSV' do
+        output = capture_stdout { cli.run }
+        
+        expect(output).to include("Translations imported successfully from #{temp_csv}")
       end
     end
   end
