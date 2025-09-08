@@ -359,6 +359,41 @@ date = Date.new(2023, 8, 15)
 => ["1,000 $", "1.000 €", "1.000 €"]
 ```
 
+## CLI Tool
+
+`MiniI18n` includes a CLI tool for managing translations between developers and translators. The tool provides a simple workflow: export all translations to a single CSV file, send it to translators, and import the updated translations back to the original YAML files.
+
+```
+Usage: mi18n [command] [options]
+
+Commands:
+  stats                    Show translation statistics
+  missing [--locale=LOCALE] Show missing translation keys
+  import [--file=FILE]     Import translations from CSV file
+  export [--file=FILE]     Export translations to CSV file
+  version                  Show version
+  help                     Show this help message
+
+Export/Import Workflow:
+  1. Run 'mi18n export' to create a single CSV file from all YAML translation files
+  2. Send CSV file to translators for translation/review
+  3. Run 'mi18n import' to update original YAML files with translated content
+
+Key Features:
+  - Single CSV file contains all translations with clean, readable keys
+  - Import automatically finds and updates the correct YAML files
+  - Preserves original file structure and organization
+  - Clean translation keys without file path information
+
+Examples:
+  mi18n stats
+  mi18n missing --locale=es
+  mi18n export                    # Creates translations.csv with all translations
+  mi18n export --file=custom.csv  # Creates custom.csv with all translations  
+  mi18n import                    # Updates YAML files from translations.csv
+  mi18n import --file=custom.csv  # Updates YAML files from custom.csv
+```
+
 ## Development
 
 Feedback, bug reports, ideas, and enhancements are welcome!
